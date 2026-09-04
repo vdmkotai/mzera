@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>mzera — plan, options & mockups</title>
+<title>mzera — plan v2 (Rust, verified), options & mockups</title>
 <style>
 /* ---------- Omarchy palettes (real colors.toml values) ---------- */
 :root, [data-theme="osaka-jade"] {
@@ -176,6 +176,13 @@ ul.plain li { margin: 5px 0; }
 .q { background: var(--bg); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 10px 0; }
 .q b { color: var(--fg-bright); }
 .q .rec { color: var(--fg-dark); font-size: 13px; margin-top: 4px; }
+.fix { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bg-light); }
+.fix .n { color: var(--red); font-weight: 700; font-size: 18px; }
+.fix b { color: var(--fg-bright); }
+.fix .was { color: var(--fg-dark); font-size: 13px; }
+.meas td:nth-child(3) { font-family: ui-monospace, monospace; color: var(--fg-bright); }
+table.km td:first-child { white-space: nowrap; color: var(--fg-bright); }
+table.km kbd { margin: 1px 0; }
 @media (max-width: 900px) { .grid2, .grid3, .arch { grid-template-columns: 1fr; } .phase { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -197,9 +204,9 @@ ul.plain li { margin: 5px 0; }
 <div class="wrap">
 
 <h1>mzera</h1>
-<p class="lead">A small, fast, keyboard-first photo &amp; WebM viewer for Omarchy. This page lays out the requirements, the stack options with an honest comparison, the architecture that makes it fast, how it follows your Omarchy theme, and mockups of the UI. Decisions I need from you are collected at the very end.</p>
+<p class="lead">A small, fast photo &amp; WebM viewer for Omarchy, fully usable from the keyboard and fully usable from the mouse. <b>Decided: Rust (gtk4-rs + libadwaita).</b> This page holds the requirements, the stack comparison, the architecture, the performance plan with measured numbers, the theme sync, the input model and the UI mockups. The plan was verified by four independent checks before any code; what they changed is in section 4b.</p>
 <div class="toc">
-  <a href="#req">1 Requirements</a><a href="#ceiling">2 Where swayimg stops</a><a href="#options">3 Stack options</a><a href="#rec">4 Recommendation</a><a href="#arch">5 Architecture</a><a href="#perf">6 Performance plan</a><a href="#theme">7 Theme sync</a><a href="#mock">8 Mockups</a><a href="#keys">9 Keys</a><a href="#road">10 Roadmap</a><a href="#ask">11 Decisions for you</a>
+  <a href="#req">1 Requirements</a><a href="#ceiling">2 Where swayimg stops</a><a href="#options">3 Stack options</a><a href="#rec">4 Decision</a><a href="#verify">4b Verification</a><a href="#arch">5 Architecture</a><a href="#perf">6 Performance plan</a><a href="#theme">7 Theme sync</a><a href="#mock">8 Mockups</a><a href="#keys">9 Keyboard &amp; mouse</a><a href="#road">10 Roadmap</a><a href="#ask">11 Decisions for you</a>
 </div>
 
 <!-- =============================================================== -->
@@ -214,6 +221,7 @@ ul.plain li { margin: 5px 0; }
       <li>Fullscreen <b>viewer</b>: ← → navigate, scale modes, pan/zoom</li>
       <li>Captions: brief / <b>metadata</b> (path, EXIF) / none. <b>Help overlay</b> with all keys</li>
       <li><b>WebM video</b> in the gallery and in the viewer</li>
+      <li><b>Full keyboard navigation and full mouse navigation</b>, each complete on its own</li>
       <li><b>Follows the Omarchy theme</b> automatically</li>
       <li>Launch: <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd>, launcher, Nautilus, CLI</li>
     </ul>
@@ -232,7 +240,7 @@ ul.plain li { margin: 5px 0; }
     <h4>Constraints</h4>
     <ul>
       <li>Wayland · Hyprland · Omarchy; no X11 assumptions</li>
-      <li><b>Performance is the top priority</b> — test set: 34 981 files, 10 GB, mostly WebP</li>
+      <li><b>Performance is the top priority</b> — test set: 34 988 images (32 779 WebP, all 1920×1080) + 432 WebM</li>
       <li>No QtWidgets look; native GTK4/libadwaita is the target</li>
       <li>English-only UI; <b>no F-keys</b></li>
       <li>Deliberately small codebase, "a bit nicer UI with room to grow", not a photo manager</li>
@@ -258,27 +266,26 @@ ul.plain li { margin: 5px 0; }
 <p>Everything below was checked against what is actually installed on your machine (GTK 4.22, libadwaita 1.9, python-gobject 3.56, glycin 2.1 with heif/jxl/svg loaders, GStreamer 1.28, libvips 8.18, ffmpeg 9, Node 26, Quickshell 0.3; <em>no</em> Rust, Go, meson, WebKitGTK or gst-plugins-good).</p>
 
 <table>
-  <tr><th></th><th>A · swayimg + Lua<br><span class="small">today</span></th><th>B · fork swayimg<br><span class="small">C, Wayland</span></th><th>C · GTK4 + libadwaita<br><span class="small">Python ★</span></th><th>D · GTK4 + libadwaita<br><span class="small">Rust</span></th><th>E · Qt Quick / QML<br><span class="small">Quickshell-style</span></th><th>F · Web<br><span class="small">Tauri / Electron</span></th><th>G · GTK front + swayimg engine</th></tr>
+  <tr><th></th><th>A · swayimg + Lua<br><span class="small">today</span></th><th>B · fork swayimg<br><span class="small">C, Wayland</span></th><th>C · GTK4 + libadwaita<br><span class="small">Python</span></th><th>D · GTK4 + libadwaita<br><span class="small">Rust ★ chosen</span></th><th>E · Qt Quick / QML<br><span class="small">Quickshell-style</span></th><th>F · Web<br><span class="small">Tauri / Electron</span></th><th>G · GTK front + swayimg engine</th></tr>
   <tr><td>Grouped-by-folder gallery</td><td><span class="tag no">no</span></td><td>write from scratch</td><td><span class="tag ok">native</span> GtkGridView sections (GTK ≥ 4.12)</td><td><span class="tag ok">native</span></td><td>write (ListView + sections)</td><td>write (virtualized DOM)</td><td>front only, not in the viewer</td></tr>
   <tr><td>Clickable, themeable UI</td><td><span class="tag no">no</span></td><td>hand-drawn in C</td><td><span class="tag ok">yes</span></td><td><span class="tag ok">yes</span></td><td><span class="tag ok">yes</span>, custom-skinned</td><td><span class="tag ok">yes</span></td><td>half</td></tr>
   <tr><td>WebM video</td><td><span class="tag no">no</span></td><td>ffmpeg integration, big</td><td><span class="tag ok">Gtk.MediaFile</span> (GStreamer)</td><td>same</td><td>QtMultimedia, extra pkgs</td><td><code>&lt;video&gt;</code></td><td><span class="tag no">no</span></td></tr>
   <tr><td>Thumbnail throughput</td><td>1 worker, stalls</td><td>good</td><td><span class="tag ok">native</span> libvips / glycin workers</td><td><span class="tag ok">best</span></td><td>Qt image threads</td><td>native backend needed</td><td>libvips workers</td></tr>
   <tr><td>Omarchy theme sync</td><td>colors only</td><td>colors only</td><td><span class="tag ok">CSS, live</span></td><td>same</td><td>QML palette, live</td><td>CSS, live</td><td>front only</td></tr>
   <tr><td>Looks like the rest of the desktop</td><td>n/a</td><td>custom</td><td><span class="tag ok">Adwaita</span>, same as Nautilus / GTK apps</td><td>same</td><td>custom; consistent with the Omarchy bar, not with GTK apps</td><td>custom</td><td>mixed</td></tr>
-  <tr><td>Toolchain installed</td><td>yes</td><td>gcc yes; meson no</td><td><span class="tag ok">all of it</span></td><td>rustup needed</td><td>qt6-declarative yes; multimedia no</td><td>node yes; webkit no</td><td>yes</td></tr>
-  <tr><td>Dev cost to v1</td><td>done, at ceiling</td><td>high</td><td><span class="tag ok">~2–3 days</span></td><td>~5–7 days</td><td>~4–5 days</td><td>~4 days</td><td>~1 day, dead end</td></tr>
+  <tr><td>Toolchain installed</td><td>yes</td><td>gcc yes; meson no</td><td><span class="tag ok">all of it</span></td><td><span class="tag ok">rustup installed</span></td><td>qt6-declarative yes; multimedia no</td><td>node yes; webkit no</td><td>yes</td></tr>
+  <tr><td>Dev cost to v1</td><td>done, at ceiling</td><td>high</td><td>~2–3 days</td><td>~5–6 days</td><td>~4–5 days</td><td>~4 days</td><td>~1 day, dead end</td></tr>
   <tr><td>Maintenance</td><td>none</td><td>C codebase</td><td>small Python</td><td>Rust</td><td>QML + C++ glue</td><td>JS + native</td><td>two apps</td></tr>
 </table>
 
 <div class="grid2">
   <div class="card pick">
-    <h4>C · GTK4 + libadwaita in Python — recommended</h4>
+    <h4>D · GTK4 + libadwaita in Rust — chosen, verified</h4>
     <ul>
-      <li>Every hot path is already native: glycin decodes in sandboxed <b>loader processes</b> (no Python GIL involved), libvips is multithreaded C, GTK renders on the GPU, GStreamer plays video.</li>
-      <li>Python only orchestrates: scanning, queues, models, widgets. Scanning 35 k entries with <code>os.scandir</code> is ~0.3 s.</li>
-      <li>GtkGridView recycles tile widgets, so 35 k items cost only as many widgets as fit on screen.</li>
-      <li>Sections by folder, incremental filtering, file dialogs, portals, drag &amp; drop: all built in.</li>
-      <li>Nothing to install. Fastest path to something you can use this week.</li>
+      <li>Same native libraries as Python for decoding, GPU rendering and video, but everything <b>between</b> them is native too: the model, the filter, the custom gallery widget, the scanner. No GIL, no GC pauses, no FFI trips per tile.</li>
+      <li>Verification found that the gallery must be a <b>custom widget</b> (GtkGridView has no sections). That is 700–900 lines of hot-path code that runs per frame; Rust is the right language for it.</li>
+      <li>Compiles today: gtk4 0.11 (v4_22), libadwaita 0.9 (v1_9), glycin 3.1. Clean build 49 s, incremental 3 s, 160 crates. One 5 MB binary, no Python-version dependency.</li>
+      <li>Cold start measured on a skeleton with 35 000 items already in the model: 160–180 ms to first frame, before any optimisation.</li>
     </ul>
   </div>
   <div class="card">
@@ -286,8 +293,8 @@ ul.plain li { margin: 5px 0; }
     <ul>
       <li><b>A</b> — ceiling reached (section 2).</li>
       <li><b>B</b> — you would be writing a UI toolkit; video would mean embedding ffmpeg by hand.</li>
-      <li><b>D</b> — the "right" GNOME answer for a long-lived project, but 2–3× the time and a toolchain to install. Kept as the upgrade path per module.</li>
-      <li><b>E</b> — QML is not the ugly QtWidgets look; it is what the Omarchy bar is made of. But you said no Qt, and it would be the only Qt app among GTK ones.</li>
+      <li><b>C</b> — the earlier recommendation; optimised for "usable in two days". Slower start, 100+ MB model, Python on the snapshot path of a custom widget. Rejected once performance was set as the top criterion.</li>
+      <li><b>E</b> — QML is not the QtWidgets look; it is what the Omarchy bar is made of. But it would be the only Qt app among GTK ones.</li>
       <li><b>F</b> — a browser to show a grid of images; heavy, and thumbnails still need a native backend.</li>
       <li><b>G</b> — the earlier "option 2": the viewer half can never do video or sections.</li>
     </ul>
@@ -295,66 +302,84 @@ ul.plain li { margin: 5px 0; }
 </div>
 
 <!-- =============================================================== -->
-<h2 id="rec">4. Recommendation in one paragraph</h2>
-<p>Build <b>mzera</b> as a GTK4 + libadwaita application in Python, with the module boundaries drawn so that the scanner and the thumbnail service can be swapped for Rust later without touching the UI. Reuse the freedesktop thumbnail cache so Nautilus and mzera share thumbnails. Keep the swayimg config as a fallback command; <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> starts pointing at <code>mzera</code> from phase 0.</p>
+<h2 id="rec">4. Decision</h2>
+<p>Build <b>mzera</b> in Rust with gtk4-rs and libadwaita. The gallery and the image view are custom widgets that draw textures directly; the model is plain vectors; thumbnails are made by libvips in-process into the shared freedesktop cache; glycin (with a process pool) decodes for the viewer; GTK's built-in GStreamer backend plays WebM. The Omarchy theme is read from <code>colors.toml</code> and reloaded live. <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> points at <code>mzera</code> from phase 0; the swayimg config stays as a fallback.</p>
+
+<!-- =============================================================== -->
+<h2 id="verify">4b. What verification changed</h2>
+<p>Four independent checks ran against the first version of this plan: a compile + cold-start test of the Rust stack, a thumbnail benchmark on your real folder, a review of GTK 4.22 internals against the gallery/viewer design, and a full input-model design checked against your Hyprland binds. Full reports are in <code>docs/verification/</code>. These are the corrections:</p>
+<div class="fix"><div class="n">1</div><div><b>GtkGridView has no sections or header factory in GTK 4.22.</b> Only ListView has it; the plan's "GridView sections since 4.12" was wrong. <span class="was">Fix: a custom <code>GalleryView</code> widget with its own layout and <code>snapshot()</code>. Sticky headers, rubber-band and selection rings are drawn, not widgets. It is also the fastest option: zero child widgets, bind cost zero, exact visibility priority, one render pass of 200–400 texture nodes.</span></div></div>
+<div class="fix"><div class="n">2</div><div><b>glycin does not downscale while decoding</b>, and without a pool it spawns a sandbox per image. <span class="was">Fix: thumbnails via libvips in-process (12 ms per 1080p WebP vs 32 ms pure-Rust vs 56 ms via the CLI). glycin with a shared pool is the viewer's decoder and the fallback for HEIC/AVIF/JXL/SVG.</span></div></div>
+<div class="fix"><div class="n">3</div><div><b>gdk-pixbuf has no native loaders on this system.</b> It delegates to a sandboxed glycin process: 6.4 ms per tile and no parallel scaling. <span class="was">Fix: tiles are read with <code>gdk::Texture::from_filename</code> (GTK's built-in PNG decoder, 0.46 ms) or an in-process PNG decode (0.27 ms). Never gdk-pixbuf, never glycin, never WebP as a cache format (6 ms reads).</span></div></div>
+<div class="fix"><div class="n">4</div><div><b>GTK list models hurt at 35 k.</b> SortListModel restarts on every insert during a streaming scan; FilterListModel's incremental mode adds a second of churn. <span class="was">Fix: the scanner emits entries already in sorted DFS order; the model is a vector plus a section-start array plus a filtered index rebuilt in ~2 ms.</span></div></div>
+<div class="fix"><div class="n">5</div><div><b>No stat during the scan.</b> <code>read_dir</code> + <code>d_type</code> only; size and mtime are read lazily by the thumbnail worker and the metadata caption. 35 k entries walk in 50–150 ms.</div></div>
+<div class="fix"><div class="n">6</div><div><b>Texture uploads must be throttled.</b> A fresh screen of tiles is ~40 MB of GPU upload; assigning it in one frame stalls. <span class="was">Fix: at most ~32 new textures per frame, nearest to the viewport first; no decode requests while scroll velocity is high.</span></div></div>
+<div class="fix"><div class="n">7</div><div><b>Video packages:</b> <code>gst-plugins-good</code>, <code>gst-plugin-va</code>, <code>gst-plugin-dav1d</code> (AV1 is not in gst-plugins-bad on Arch). GTK's built-in GStreamer sink supports DMABuf zero-copy on Wayland.</div></div>
+<div class="fix"><div class="n">8</div><div><b>Test set corrected:</b> <code>~/Downloads/University_of_Problems-1.9.0-Extended-pc</code>: 34 988 images (32 779 WebP, all 1920×1080, none animated; 1 261 PNG; 948 JPEG) and 432 WebM.</div></div>
+<div class="fix"><div class="n">9</div><div><b>Keys the app can never receive:</b> every Super combo, Alt+Tab, Print, media keys, and Ctrl+Space (your keyboard-layout toggle). The input model avoids all of them. Mouse side buttons arrive in GTK as buttons 8 and 9 (verified in GTK's Wayland code).</div></div>
 
 <!-- =============================================================== -->
 <h2 id="arch">5. Architecture</h2>
-<div class="legend"><span><i style="background:color-mix(in srgb, var(--green) 60%, var(--bg-light))"></i>native code, off the UI thread</span><span><i style="background:color-mix(in srgb, var(--accent) 60%, var(--bg-light))"></i>Python orchestration</span></div>
+<div class="legend"><span><i style="background:color-mix(in srgb, var(--green) 60%, var(--bg-light))"></i>worker threads / other processes</span><span><i style="background:color-mix(in srgb, var(--accent) 60%, var(--bg-light))"></i>UI thread (Rust, GTK main context)</span></div>
 <div class="arch">
-  <div class="b py wide"><b>Entry points</b><span class="who">cli · desktop entry · Hyprland bind · Nautilus script</span> <code>mzera [--warm] [--gallery|--viewer] [paths…]</code> → single-instance Adw.Application; a second launch just opens more paths.</div>
-  <div class="b py"><b>Scanner</b><span class="who">thread</span> <code>os.scandir</code> recursive, streams batches of ~500 into the model. Skips hidden dirs. Sorts numerically (1, 2, 10) like today.</div>
-  <div class="b py"><b>Model</b><span class="who">Gio.ListStore</span> <code>MediaItem</code>: path, folder, kind (image/video), ext, size, mtime. ~1 KB each → ~35 MB for the test set.</div>
-  <div class="b py"><b>Pipeline</b><span class="who">GTK list models</span> FilterListModel (format chips, incremental) → SortListModel → section model keyed by folder. All lazy, no copies.</div>
-  <div class="b py"><b>Gallery</b><span class="who">Gtk.GridView</span> Recycled tiles, header factory for folder sections, jump list, zoom = change tile size. Flat and grouped are the same view with sections on/off.</div>
-  <div class="b native"><b>ThumbService</b><span class="who">libvips · glycin · ffmpegthumbnailer</span> freedesktop cache (<code>~/.cache/thumbnails/large|x-large</code>), worker pool = cores, LIFO priority by visibility, cancel on scroll-away.</div>
-  <div class="b native"><b>Decoder</b><span class="who">glycin loader processes</span> JPEG, PNG, WebP, GIF, HEIC/AVIF, JXL, SVG, TIFF… decoded sandboxed, off-process, async. EXIF from glycin metadata.</div>
-  <div class="b native"><b>Video</b><span class="who">Gtk.Video · GStreamer</span> WebM (VP8/VP9/AV1) via gst-plugins-good/bad, VA-API hardware decode on the AMD iGPU.</div>
-  <div class="b py"><b>Viewer</b><span class="who">Gtk.Picture</span> Preload ring ±2, Gdk.Texture LRU with a memory cap, scale modes, pan/zoom gestures, captions &amp; help overlays.</div>
-  <div class="b py wide"><b>Theme</b><span class="who">Gio.FileMonitor</span> Reads <code>~/.local/state/omarchy/current/theme/colors.toml</code> → generates CSS → Gtk.CssProvider. Reloads live on theme change. Optional user override via <code>~/.config/omarchy/themed/mzera.css.tpl</code>. <code>mode</code> drives Adw.StyleManager dark/light.</div>
+  <div class="b py wide"><b>Entry points</b><span class="who">cli · desktop entry · Hyprland bind · Nautilus script</span> <code>mzera [--warm] [--gallery|--viewer] [paths…]</code> → single-instance <code>adw::Application</code>; the window is presented <b>before</b> the scan starts; a second launch just opens more paths.</div>
+  <div class="b native"><b>Scanner</b><span class="who">1 thread</span> Sorted DFS with natural sort per directory, <code>read_dir</code> + <code>d_type</code> only, no stat. Batches of 512 over <code>async_channel</code>, inserted at default priority. 35 k entries in 50–150 ms.</div>
+  <div class="b py"><b>Model</b><span class="who">plain vectors</span> <code>Vec&lt;Entry&gt;</code> (path, folder id, kind, ext) + section-start array + filtered index <code>Vec&lt;u32&gt;</code> + selection bitset, current, anchor. ~10 MB for 35 k. No GTK list models on the hot path.</div>
+  <div class="b py"><b>GalleryView</b><span class="who">custom gtk::Widget + Scrollable</span> Fixed square tiles, flat or sectioned layout via prefix sums. <code>snapshot()</code> draws textures, sticky headers, selection rings, rubber-band. Owns keyboard and mouse handling. Jump list = ListView with sections.</div>
+  <div class="b native"><b>ThumbService</b><span class="who">8–12 threads (16 for --warm)</span> fd.o cache PNG. Priority queue keyed by distance from the viewport centre, LIFO within equal distance, generation counter for cancellation. Decoders: libvips <code>thumbnail</code> → glycin pool fallback → ffmpegthumbnailer for video. Results drained ≤ 32 per frame from a tick callback.</div>
+  <div class="b py"><b>ImageView</b><span class="who">custom gtk::Widget</span> <code>snapshot()</code> = one <code>append_scaled_texture</code> under a zoom/pan transform; trilinear below 1:1. Zoom, drag and pinch mutate (scale, offset) only; never re-decode. Preload ring ±2 with cancellables; bytes-capped LRU ≈ 1 GB.</div>
+  <div class="b native"><b>Decoder</b><span class="who">glycin 3.1 loader processes, shared Pool</span> JPEG, PNG, WebP, GIF, HEIC/AVIF, JXL, SVG, TIFF decoded sandboxed and async into a memfd-backed <code>gdk::Texture</code>; 8-bit formats only. EXIF via kamadak-exif.</div>
+  <div class="b native"><b>Video</b><span class="who">gtk::Video · GTK's GStreamer backend</span> WebM VP8/VP9/AV1 with VA-API decode on the AMD iGPU, DMABuf zero-copy. Autoplay muted, loop, minimal control pill.</div>
+  <div class="b py"><b>Actions</b><span class="who">one static table</span> name, label, group, modes, accelerators, mouse hint → <code>gio::SimpleAction</code>s, accels, menus, tooltips and the help overlay. Mode gating by enabling actions, so the same key means the right thing in each mode.</div>
+  <div class="b py wide"><b>Theme</b><span class="who">notify / inotify</span> Reads <code>~/.local/state/omarchy/current/theme/colors.toml</code> → ~50 lines of CSS → one <code>CssProvider</code>, swapped live on theme change. <code>mode</code> drives the Adwaita color scheme. Optional user override via <code>~/.config/omarchy/themed/mzera.css.tpl</code>.</div>
 </div>
 
 <h3>Project layout</h3>
 <pre>mzera/
-├── mzera/                 python package
-│   ├── app.py             Adw.Application, single instance, CLI args
-│   ├── window.py          main window, mode switching (gallery / viewer)
-│   ├── scanner.py         recursive scan → batches
-│   ├── model.py           MediaItem, folder index
-│   ├── thumbs.py          ThumbService, fd.o cache, workers, priorities
-│   ├── gallery.py         GridView, sections, jump list, zoom
-│   ├── viewer.py          Picture/Video, preload ring, scale modes
-│   ├── overlays.py        captions, help, status toast
-│   ├── filters.py         format chips → Gtk.CustomFilter
-│   ├── keys.py            one key table → shortcuts + help text
-│   └── theme.py           Omarchy colors.toml → CSS, live reload
+├── Cargo.toml             gtk4 0.11 (v4_22) · libadwaita 0.9 (v1_9) · glycin 3.1 (gdk4)
+│                          libvips · async-channel · notify · toml · kamadak-exif
+├── src/
+│   ├── main.rs / app.rs   adw::Application, CLI, single instance, window before scan
+│   ├── theme.rs           colors.toml → CSS, live reload, color scheme
+│   ├── scan.rs            sorted DFS, batches over async_channel
+│   ├── model.rs           Entry slab, sections, filtered index, selection
+│   ├── thumbs.rs          fd.o cache, worker pool, priority queue, per-frame drain, --warm
+│   ├── gallery.rs         GalleryView widget: layout, snapshot, input
+│   ├── viewer.rs          ImageView widget: zoom/pan, preload ring, LRU
+│   ├── video.rs           gtk::Video wrapper, control pill
+│   ├── overlays.rs        floating toolbar, captions, help, toasts
+│   ├── actions.rs         the action table → actions, accels, menus, help
+│   └── filters.rs         format chips, presets, folder-only, search (v2)
 ├── data/                  mzera.desktop, icon, mzera.css.tpl, nautilus script
-├── bin/mzera              launcher
-├── docs/                  this page, PLAN.md
-└── Makefile               install / uninstall into ~/.local</pre>
+├── docs/                  this page, PLAN.md, verification/
+└── Makefile               cargo build --release; install into ~/.local</pre>
 
 <!-- =============================================================== -->
-<h2 id="perf">6. Performance plan</h2>
-<p>Test set: <code>~/Downloads/University_of_Problems</code> — 34 981 files, 10 GB, mostly WebP. Budgets are gates: a phase is not done until its numbers hold on this set.</p>
-<table class="budget">
-  <tr><th>Metric</th><th>Budget</th><th>How it is met</th></tr>
-  <tr><td>Open folder → first grid frame</td><td>&lt; 300 ms</td><td>Scanner streams into the model; the grid shows the first batch while the rest is still scanning.</td></tr>
-  <tr><td>Full scan of 35 k entries</td><td>&lt; 1 s</td><td><code>os.scandir</code> with <code>DirEntry.stat</code>, no per-file Python objects until batch insert.</td></tr>
-  <tr><td>Scroll with warm cache</td><td>60 fps</td><td>Thumbnails are PNGs read + turned into Gdk.Texture on workers; the UI thread only swaps a paintable. GridView recycles widgets.</td></tr>
-  <tr><td>Scroll with cold cache</td><td>visible tiles first, no jank</td><td>LIFO priority queue: the tile that scrolled into view last is decoded first; tiles that scrolled away are cancelled.</td></tr>
-  <tr><td>Cold cache build, 35 k WebP → 256 px</td><td>≈ 2–3 min on 16 threads</td><td>libvips shrink-on-load: libwebp scales while decoding, never a full-size bitmap. HEIF/JXL via libvips loaders, everything else via glycin. Background, nice/ionice.</td></tr>
-  <tr><td>Viewer next / prev</td><td>&lt; 50 ms perceived</td><td>Preload ring ±2 via glycin async; the texture is ready before the key is pressed.</td></tr>
-  <tr><td>Filter change on 35 k items</td><td>UI stays responsive</td><td>Gtk.FilterListModel in incremental mode processes in idle slices.</td></tr>
-  <tr><td>Memory</td><td>model ≈ 35 MB · textures ≤ 512 MB</td><td>Tile textures are small; viewer textures live in an LRU with a byte cap.</td></tr>
+<h2 id="perf">6. Performance plan — measured</h2>
+<p>Test set: <code>~/Downloads/University_of_Problems-1.9.0-Extended-pc</code> — 34 988 images (32 779 WebP at 1920×1080, 1 261 PNG, 948 JPEG) and 432 WebM. Budgets are gates; "measured" values were taken on this machine during verification (<code>docs/verification/thumbnails.md</code>, <code>toolchain.md</code>).</p>
+<table class="meas">
+  <tr><th>Metric</th><th>Budget</th><th>Measured / basis</th><th>How</th></tr>
+  <tr><td>App start → first frame</td><td>&lt; 120 ms</td><td>160–180 ms on the skeleton (35 k items already in the model)</td><td>Present the window before the scan; tiny CSS; no icons or pictures in the first frame; Vulkan renderer (default here).</td></tr>
+  <tr><td>Full scan of 35 k entries</td><td>&lt; 300 ms</td><td>50–150 ms (sorted DFS, no stat)</td><td><code>read_dir</code> + <code>d_type</code>; batches of 512; the first batch reaches the screen 10–20 ms after the window.</td></tr>
+  <tr><td>Thumbnail decode, 1080p WebP → 256 px</td><td>≤ 15 ms / file / thread</td><td>12.3 ms libvips in-process · 32 ms pure Rust · 56 ms vips CLI</td><td>Shrink-on-load in libwebp. Never shell out (28 ms exec overhead per file).</td></tr>
+  <tr><td>Thumbnail throughput, 16 threads</td><td>&gt; 300 files / s</td><td>451 files / s warm · 418 cold (CPU-bound, IO is 4 %)</td><td>In-process workers; SMT adds 24 % over 8 cores.</td></tr>
+  <tr><td>Cold build of the full set (<code>--warm</code>)</td><td>&lt; 2 min</td><td>projected 78 s warm / 84 s cold + 3 s video</td><td>Runs in its own process at nice 10; the app's own pool prioritises the viewport instead.</td></tr>
+  <tr><td>Tile read from cache</td><td>&lt; 1 ms / tile off-thread</td><td>0.46 ms Gdk.Texture (PNG) · 0.27 ms in-process PNG · 6.4 ms gdk-pixbuf (banned)</td><td>Worker reads PNG → texture; UI thread only swaps a reference.</td></tr>
+  <tr><td>Scroll with warm cache</td><td>60 fps</td><td>48-tile screen ≈ 13–22 ms of worker time, 0 on UI thread</td><td>Custom widget, ≤ 32 textures assigned per frame, textures ≤ 256 px live in GPU atlases.</td></tr>
+  <tr><td>Scroll with cold cache</td><td>visible first, no jank</td><td>design</td><td>Priority by distance from viewport, cancel on scroll-away, no requests while velocity is high.</td></tr>
+  <tr><td>Viewer next / prev</td><td>&lt; 16 ms perceived</td><td>design; 1080p RGBA frame = 8 MB upload</td><td>Preload ring ±2 through a glycin pool; texture resident before the key press.</td></tr>
+  <tr><td>Filter toggle on 35 k</td><td>&lt; 10 ms</td><td>filtered index rebuild ≈ 2 ms</td><td>No incremental FilterListModel.</td></tr>
+  <tr><td>Video thumbnail</td><td>&lt; 100 ms / file</td><td>65–87 ms ffmpegthumbnailer</td><td>432 videos ≈ 3 s on 16 threads.</td></tr>
+  <tr><td>Memory</td><td>model ≈ 10 MB · tiles ≤ 512 MB · viewer LRU ≤ 1 GB</td><td>175–262 KB per tile texture</td><td>1 500–2 500 tiles resident, pinned visible ± 2 screens, evicted by distance then age.</td></tr>
 </table>
 <div class="grid2">
-  <div class="card"><h4>Why the freedesktop cache</h4><ul><li>Nautilus already writes the same files: thumbnails made by one app are reused by the other.</li><li>Standard: 256 px "large", 512 px "x-large", PNG with <code>Thumb::MTime</code>, invalidated by mtime.</li><li>Survives restarts; no private format to maintain (the swayimg cache was a private layout with inode keys).</li></ul></div>
-  <div class="card"><h4>Fallbacks and guards</h4><ul><li>Any decode error → placeholder tile with a format badge, never a crash or a stall.</li><li>Thumbnail work is cancellable; closing the window drains the pool immediately.</li><li><code>mzera --warm ~/Pictures</code> pre-builds the cache from a terminal or a hook, same code path.</li></ul></div>
+  <div class="card"><h4>Why the freedesktop cache still wins</h4><ul><li>Nautilus writes the same PNGs; thumbnails made by one app are reused by the other.</li><li>0.46 ms per tile read is already far under budget; a private JPEG cache (0.10 ms, 11 KB) stays as a fallback only if a cold box ever shows PNG decode on the profile.</li><li>Standard: 256 px "large", 512 px "x-large" for big tiles, <code>Thumb::MTime</code> validation with one statx in the worker.</li></ul></div>
+  <div class="card"><h4>Guards</h4><ul><li>Any decode error → placeholder with a format badge plus an fd.o <code>fail/</code> marker so it is not retried.</li><li>Every request carries a generation number; closing the window or changing the folder drains the pool instantly.</li><li>Key repeat from the compositor is 40 Hz: the viewer decodes only the latest requested index and cancels the rest.</li><li><code>GSK_RENDERER=ngl</code> fallback in the launcher if the Vulkan renderer misbehaves.</li></ul></div>
 </div>
 
 <!-- =============================================================== -->
 <h2 id="theme">7. Theme sync with Omarchy</h2>
-<p>Omarchy writes the active palette to <code>~/.local/state/omarchy/current/theme/colors.toml</code> on every <code>omarchy theme set</code>. mzera reads it directly, so it works on a fresh install with zero setup, and watches the file to re-skin itself live. Use the theme buttons at the top of this page to see what that looks like across the mockups.</p>
+<p>Omarchy writes the active palette to <code>~/.local/state/omarchy/current/theme/colors.toml</code> on every <code>omarchy theme set</code>. mzera reads it directly, so it works on a fresh install with zero setup, and watches the file with inotify to re-skin itself live. Use the theme buttons at the top of this page to see what that looks like across the mockups.</p>
 <div class="grid2">
 <pre># colors.toml (Osaka Jade, your current theme)   →   what mzera does with it
 mode        = "dark"       →  Adw.StyleManager: dark / light
@@ -417,7 +442,7 @@ window.mzera   { background: {{ background }};
   <div class="gal under" style="--cols:10"><div class="tiles" data-tiles="50" data-sel="13" data-video="7,31" data-loading="46,47,48,49"></div></div>
   <div class="mstatus"><b>University_of_Problems</b><span>34 981 files · 1 240 folders</span><span class="sp"></span><span>filter: <b>no WebP</b> — 3 106 shown</span><span>thumbs <b>256 px</b></span><span>cache 71 %</span></div>
 </div>
-<div class="caption"><b>Flat grid.</b> <kbd>+</kbd>/<kbd>−</kbd> or <kbd>Ctrl</kbd>+scroll changes tile size. Selected tile gets the accent ring and lifts slightly. Striped tiles at the end are still decoding (cold cache). Video tiles show a play badge and duration. The status line shows the active filter and cache progress.</div>
+<div class="caption"><b>Flat grid.</b> Drawn by the custom GalleryView widget. <kbd>+</kbd>/<kbd>−</kbd> or <kbd>Ctrl</kbd>+wheel changes tile size. Click selects, double-click opens, Ctrl/Shift+click and rubber-band drag multi-select, middle click toggles. Selected tile gets the accent ring and lifts slightly; hovering lifts it and shows a corner checkbox. Striped tiles are still decoding (cold cache). Video tiles show a play badge and duration. Status-bar items are clickable (root opens Nautilus, counts rescan, filter opens the popover, px cycles size).</div>
 
 <h3>8.3 Gallery — grouped by folder</h3>
 <div class="mock full hframe">
@@ -433,7 +458,7 @@ window.mzera   { background: {{ background }};
   <div class="jump"><div class="h">Folders</div><div class="it">Day 1 <span>312</span></div><div class="it on">Day 2 <span>540</span></div><div class="it sub on">Museum <span>88</span></div><div class="it sub">Streets <span>452</span></div><div class="it">Day 3 <span>410</span></div><div class="it">Day 4 <span>1 086</span></div></div>
   <div class="mstatus"><b>Trip 2025</b><span>2 348 files · 14 folders</span><span class="sp"></span><span>section 2 / 14</span></div>
 </div>
-<div class="caption"><b>By folder.</b> Same grid, with sticky section headers and a jump list on the right. <kbd>m</kbd> toggles flat ↔ by folder; <kbd>[</kbd> / <kbd>]</kbd> jump to previous / next folder; clicking a folder in the list scrolls to it. Arrow keys still move through everything in order — navigation does not stop at folder boundaries.</div>
+<div class="caption"><b>By folder.</b> Same grid, with sticky section headers and a jump list on the right. <kbd>m</kbd> toggles flat ↔ by folder; <kbd>[</kbd> / <kbd>]</kbd>, Shift+wheel or the mouse side buttons jump to previous / next folder; clicking a header scrolls it to the top, double-clicking opens the viewer there, hovering a header reveals "open in file manager" and "only this folder". Arrow keys move through everything in order; navigation does not stop at folder boundaries. Headers are drawn sticky by the widget itself.</div>
 
 <h3>8.4 Viewer — three caption modes</h3>
 <div class="grid2">
@@ -503,40 +528,48 @@ window.mzera   { background: {{ background }};
     <div class="mock small hframe"><div class="viewer"><div class="photo" style="background:linear-gradient(120deg,#11202b,#1f4c5e 50%,#6fb1c9)"></div>
       <div class="overlay tl">clip_0412.webm</div><div class="overlay tr">1 208 / 2 348</div>
       <div class="vctl"><span>▶</span><div class="bar"></div><span class="mono">0:14 / 0:37</span><span>🔇</span></div></div></div>
-    <div class="caption"><b>Video in the viewer.</b> WebM plays inline through GStreamer with a minimal control pill. <kbd>Space</kbd> play/pause, <kbd>← →</kbd> still navigate files, muted by default, loops.</div>
+    <div class="caption"><b>Video in the viewer.</b> WebM plays inline through GTK's GStreamer backend with a minimal control pill. <kbd>Space</kbd> or a click = play/pause, <kbd>← →</kbd> still navigate files, <kbd>Shift</kbd>+<kbd>← →</kbd> seek ±5 s, drag the bar to scrub, <kbd>v</kbd> mute. Muted by default, loops.</div>
   </div>
 </div>
 
 <!-- =============================================================== -->
-<h2 id="keys">9. Keys (carried over from the swayimg config)</h2>
-<table>
-  <tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr>
-  <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>previous / next</td><td><kbd>t</kbd></td><td>captions: brief → metadata → clean</td></tr>
-  <tr><td><kbd>Shift</kbd>+arrows</td><td>pan a zoomed image</td><td><kbd>h</kbd> <kbd>?</kbd></td><td>help overlay</td></tr>
-  <tr><td><kbd>g</kbd> <kbd>Enter</kbd></td><td>gallery ↔ viewer</td><td><kbd>m</kbd></td><td>gallery: flat ↔ by folder</td></tr>
-  <tr><td><kbd>Tab</kbd> <kbd>Shift+Tab</kbd> <kbd>1–9</kbd> <kbd>0</kbd></td><td>cycle / pick / reset format filter</td><td><kbd>[</kbd> <kbd>]</kbd></td><td>previous / next folder</td></tr>
-  <tr><td><kbd>w</kbd> <kbd>Shift+w</kbd></td><td>scale mode: fit → fill → width → height → 1:1</td><td><kbd>+</kbd> <kbd>−</kbd></td><td>thumbnail size</td></tr>
-  <tr><td><kbd>f</kbd></td><td>fullscreen</td><td><kbd>Space</kbd></td><td>video play / pause</td></tr>
-  <tr><td><kbd>q</kbd> <kbd>Esc</kbd></td><td>close viewer → gallery → quit</td><td><kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd></td><td>(Hyprland) folder picker → mzera</td></tr>
+<h2 id="keys">9. Keyboard &amp; mouse</h2>
+<p>Every action has a keyboard path and a mouse path. swayimg habits come first, GNOME combos are aliases. Not used anywhere: F-keys, Super combos (Hyprland owns them), Ctrl+Space (your layout toggle), media keys. The complete per-mode tables, the context-menu contents and the GTK implementation notes are in <code>docs/verification/input.md</code>.</p>
+<table class="km">
+  <tr><th>Action</th><th>Keyboard</th><th>Mouse</th></tr>
+  <tr><td>Next / previous</td><td><kbd>→</kbd> <kbd>←</kbd> (also <kbd>↓</kbd> <kbd>↑</kbd>, <kbd>Space</kbd> / <kbd>Shift+Space</kbd>); <kbd>PageDown</kbd> <kbd>PageUp</kbd> ±10; <kbd>Home</kbd> <kbd>End</kbd></td><td>wheel when the image fits; side buttons back / forward; ‹ › edge buttons on hover; two-finger swipe</td></tr>
+  <tr><td>Gallery ↔ viewer</td><td><kbd>Enter</kbd> <kbd>g</kbd>, back with <kbd>Esc</kbd></td><td>double-click tile; middle click in the viewer; Grid button on the toolbar</td></tr>
+  <tr><td>Pan (zoomed)</td><td><kbd>Shift</kbd>+arrows, <kbd>Ctrl+Shift</kbd>+arrows fast</td><td>left drag; wheel / Shift+wheel when zoomed</td></tr>
+  <tr><td>Zoom / scale mode</td><td><kbd>+</kbd> <kbd>−</kbd>, <kbd>Ctrl+0</kbd> reset, <kbd>Ctrl+1</kbd> 1:1, <kbd>Ctrl+2</kbd> 200 %, <kbd>w</kbd> / <kbd>Shift+w</kbd> fit → fill → width → height → 1:1</td><td>Ctrl+wheel around the pointer; double-click toggles 1:1; pinch; scale button (right-click = menu)</td></tr>
+  <tr><td>Folders</td><td><kbd>[</kbd> <kbd>]</kbd> prev / next folder; <kbd>m</kbd> flat ↔ by folder; <kbd>j</kbd> jump list; <kbd>Backspace</kbd> parent (gallery)</td><td>header click; jump list; Shift+wheel; side buttons in the gallery; header hover icons</td></tr>
+  <tr><td>Selection (gallery)</td><td>arrows move; <kbd>Shift</kbd>+arrows extend; <kbd>Space</kbd> / <kbd>Insert</kbd> toggle; <kbd>Ctrl+A</kbd> all</td><td>click; Ctrl+click toggle; Shift+click range; middle click toggle; rubber-band drag; corner checkbox on hover</td></tr>
+  <tr><td>Filters</td><td><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> presets; <kbd>1</kbd>–<kbd>9</kbd> direct; <kbd>0</kbd> reset; <kbd>i</kbd> popover</td><td>Filters chip (wheel cycles, middle click resets); checkboxes and "Only …" in the popover; status-bar filter text</td></tr>
+  <tr><td>Thumbnail size</td><td><kbd>+</kbd> <kbd>−</kbd>, <kbd>Ctrl+0</kbd></td><td>Ctrl+wheel; pinch; px label in the status bar</td></tr>
+  <tr><td>Captions / metadata / help</td><td><kbd>t</kbd> cycle; <kbd>Alt+Enter</kbd> metadata; <kbd>h</kbd> <kbd>?</kbd> help</td><td>toolbar buttons; ? icon; metadata rows click to copy / open</td></tr>
+  <tr><td>Video</td><td><kbd>Space</kbd> play / pause; <kbd>Shift+← →</kbd> ±5 s; <kbd>Ctrl+Shift+← →</kbd> ±30 s; <kbd>,</kbd> <kbd>.</kbd> step; <kbd>Shift+↑ ↓</kbd> volume; <kbd>v</kbd> mute; <kbd>l</kbd> loop</td><td>click = play / pause; pill: ▶, scrub bar (wheel ±5 s), time, speaker (wheel = volume)</td></tr>
+  <tr><td>Files</td><td><kbd>y</kbd> / <kbd>Ctrl+C</kbd> copy path; <kbd>o</kbd> open folder; <kbd>e</kbd> open with; <kbd>Delete</kbd> trash; <kbd>Ctrl+O</kbd> open folder…; <kbd>Ctrl+R</kbd> rescan</td><td>right-click context menu on tiles and on empty space; status-bar root / counts</td></tr>
+  <tr><td>App</td><td><kbd>f</kbd> fullscreen; <kbd>s</kbd> slideshow; <kbd>q</kbd> / <kbd>Ctrl+Q</kbd> quit; <kbd>Menu</kbd> context menu; <kbd>Ctrl+Tab</kbd> focus grid ↔ toolbar ↔ jump list; <kbd>/</kbd> search</td><td>⋮ menu; right click empty space; toolbar auto-hides after 2 s and returns on pointer motion</td></tr>
+  <tr><td>Launch</td><td><kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> (Hyprland) → folder picker → mzera</td><td>launcher entry; Nautilus "Open with" / script; double-click a photo</td></tr>
 </table>
+<p class="small">Implementation: one static action table generates the actions, accelerators, menus, tooltips and the help overlay, so they cannot disagree. Keys that must beat widget defaults use a capture-phase ShortcutController; mouse buttons are read from a GestureClick on button 0 (1/2/3/8/9, plus 10/11 for mice that report BTN_BACK/FORWARD); wheel and touchpad are told apart by the scroll unit; pinch via GestureZoom.</p>
 
 <!-- =============================================================== -->
 <h2 id="road">10. Roadmap</h2>
-<div class="phase"><div class="n">Phase 0 · ½ day<br><span class="small">skeleton</span></div><div>Package layout, <code>mzera</code> CLI, desktop entry, <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> → mzera, folder picker, empty window, theme sync live.</div><div class="gate"><b>Gate:</b> opens from all launch paths, is themed, re-skins when you run <code>omarchy theme set</code>.</div></div>
-<div class="phase"><div class="n">Phase 1 · 1 day<br><span class="small">gallery + thumbnails</span></div><div>Scanner, model, flat GridView, ThumbService with fd.o cache, <code>--warm</code>, thumbnail zoom, status line.</div><div class="gate"><b>Gate:</b> 35 k folder → first frame &lt; 300 ms; smooth scroll with warm cache; cold build finishes in the background.</div></div>
-<div class="phase"><div class="n">Phase 2 · ½–1 day<br><span class="small">viewer</span></div><div>Fullscreen viewer, arrows, scale modes, pan/zoom, preload ring, captions (3 modes), help overlay, key table.</div><div class="gate"><b>Gate:</b> next/prev &lt; 50 ms perceived on the test set.</div></div>
-<div class="phase"><div class="n">Phase 3 · ½ day<br><span class="small">filters + folders</span></div><div>Format chips with counts, incremental filtering, sections by folder, jump list, <kbd>m</kbd> / <kbd>[</kbd> <kbd>]</kbd>.</div><div class="gate"><b>Gate:</b> toggling a filter on 35 k items never freezes the UI.</div></div>
-<div class="phase"><div class="n">Phase 4 · ½ day<br><span class="small">video</span></div><div>Install gst-plugins-good/bad + gst-plugin-va, video tiles via ffmpegthumbnailer, inline playback, video in filters.</div><div class="gate"><b>Gate:</b> WebM plays with hardware decode, arrow keys still navigate.</div></div>
-<div class="phase"><div class="n">Phase 5 · ½ day<br><span class="small">integration</span></div><div>xdg-mime default, Nautilus "Open with" + script, slideshow, trash, rotate, settings file, swayimg kept as <code>photos --engine swayimg</code> fallback.</div><div class="gate"><b>Gate:</b> double-click a photo in Nautilus → mzera with the whole folder.</div></div>
-<p class="small" style="margin-top:14px">Total to a usable v1: about 3–4 working days. Every phase leaves something you can use.</p>
+<div class="phase"><div class="n">Phase 0 · ½ day<br><span class="small">skeleton</span></div><div>Cargo project from the verified skeleton, <code>mzera</code> CLI, desktop entry, <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> → mzera, folder picker, theme live, empty window shown before the scan.</div><div class="gate"><b>Gate:</b> opens from all launch paths, themed, re-skins on <code>omarchy theme set</code>, first frame &lt; 120 ms.</div></div>
+<div class="phase"><div class="n">Phase 1 · 1 day<br><span class="small">scan + gallery core</span></div><div>Streaming scanner, model, <code>GalleryView</code> flat mode with placeholders, keyboard and mouse basics (arrows, click, double-click, wheel, Ctrl+wheel size, side buttons).</div><div class="gate"><b>Gate:</b> 35 k folder: first tiles &lt; 200 ms, full scan &lt; 300 ms, 60 fps scroll with placeholders.</div></div>
+<div class="phase"><div class="n">Phase 2 · 1 day<br><span class="small">thumbnails</span></div><div>ThumbService: fd.o cache, libvips workers, priority queue, per-frame throttle, <code>--warm</code>, video thumbnails via ffmpegthumbnailer.</div><div class="gate"><b>Gate:</b> warm scroll 60 fps; cold: visible tiles fill in &lt; 150 ms; <code>--warm</code> on the test set &lt; 2 min.</div></div>
+<div class="phase"><div class="n">Phase 3 · 1 day<br><span class="small">viewer</span></div><div><code>ImageView</code>, glycin pool, preload ring, scale modes, zoom / pan / pinch, side buttons, toolbar auto-hide, three caption modes, help overlay from the action table.</div><div class="gate"><b>Gate:</b> next / prev &lt; 16 ms perceived on 1080p WebP; no decode on the UI thread.</div></div>
+<div class="phase"><div class="n">Phase 4 · ½–1 day<br><span class="small">grouped gallery + filters</span></div><div>Sections with sticky headers, jump list, <kbd>m</kbd> / <kbd>[</kbd> <kbd>]</kbd>, format chips with counts, presets 1–9, folder-only filter.</div><div class="gate"><b>Gate:</b> filter toggle &lt; 10 ms; section jump instant.</div></div>
+<div class="phase"><div class="n">Phase 5 · ½ day<br><span class="small">video</span></div><div>Install gst-plugins-good / gst-plugin-va / gst-plugin-dav1d, <code>gtk::Video</code> in the viewer, control pill, video keys.</div><div class="gate"><b>Gate:</b> WebM plays with VA-API decode, arrows still navigate, zero-copy confirmed or documented.</div></div>
+<div class="phase"><div class="n">Phase 6 · ½ day<br><span class="small">integration</span></div><div>xdg-mime default, Nautilus "Open with" + script, slideshow, copy path / open folder, settings file, swayimg kept as fallback.</div><div class="gate"><b>Gate:</b> double-click a photo in Nautilus → mzera on the whole folder.</div></div>
+<p class="small" style="margin-top:14px">Total to a usable v1: about 5–6 working days. Later: trash with undo, rotate / flip, multi-select operations, sort by date / size, name search, turbojpeg scaled decode for huge JPEGs, tiling above 16 384 px, hover-scrub, per-folder state.</p>
 
 <!-- =============================================================== -->
 <h2 id="ask">11. Decisions for you</h2>
-<div class="q"><b>1. Python now, or Rust from day one?</b><div class="rec">Recommendation: Python. All hot paths are native anyway; Rust doubles the time and needs a toolchain. The module split keeps a later port cheap.</div></div>
-<div class="q"><b>2. App shell: V1 immersive, V2 classic header bar + sidebar, or V1 with V3 folder browser as a third mode?</b><div class="rec">Recommendation: V1 now, V3 as a mode later if you miss a folder tree.</div></div>
-<div class="q"><b>3. Thumbnail cache: shared freedesktop cache or a private one?</b><div class="rec">Recommendation: shared. Nautilus contributes, standard format, nothing to invent.</div></div>
-<div class="q"><b>4. Metadata: side panel (mockup 8.4) or corner overlay like in swayimg today?</b><div class="rec">Recommendation: side panel; overlay is one more mode if you want both.</div></div>
-<div class="q"><b>5. Keep swayimg + <code>photos</code> as a fallback command after mzera is stable?</b><div class="rec">Recommendation: keep until phase 5 is done, then decide.</div></div>
+<div class="q"><b>1. App shell: V1 immersive (floating pill, no header bar), V2 classic header bar + sidebar, or V1 with the V3 folder browser as a third mode?</b><div class="rec">Recommendation: V1 now, V3 as a mode later if you miss a folder tree.</div></div>
+<div class="q"><b>2. Thumbnail cache: shared freedesktop PNG cache or a private JPEG cache?</b><div class="rec">Recommendation: shared. 0.46 ms reads are far under budget and Nautilus contributes thumbnails.</div></div>
+<div class="q"><b>3. Metadata: side panel (mockup 8.4) or corner overlay like in swayimg today?</b><div class="rec">Recommendation: side panel; the overlay can be an extra caption mode.</div></div>
+<div class="q"><b>4. Keep swayimg + <code>photos</code> as a fallback command until phase 6 is done?</b><div class="rec">Recommendation: keep, then decide.</div></div>
 
 </div>
 
