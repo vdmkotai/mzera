@@ -1,0 +1,6 @@
+#!/bin/sh
+# Nautilus script: right click → Scripts → "Open in Mzera". Works on a folder or on selected files.
+if [ "$#" -gt 0 ]; then
+  exec mzera "$@"
+fi
+exec mzera "$NAUTILUS_SCRIPT_CURRENT_URI"

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Mzera
+GenericName=Photo viewer
+Comment=Fast photo and WebM viewer: recursive folders, gallery by folder, filters
+Exec=mzera %f
+Icon=multimedia-photo-viewer
+Terminal=false
+Categories=Graphics;Viewer;2DGraphics;
+Keywords=photo;image;picture;viewer;gallery;browse;webm;
+MimeType=inode/directory;image/jpeg;image/png;image/webp;image/gif;image/tiff;image/bmp;image/avif;image/heif;image/heic;image/jxl;image/svg+xml;video/webm;
+StartupNotify=true

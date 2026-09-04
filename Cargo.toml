@@ -1,0 +1,28 @@
+[package]
+name = "mzera"
+version = "0.1.0"
+edition = "2024"
+description = "Fast keyboard+mouse photo & WebM viewer for Omarchy"
+license = "MIT"
+
+[dependencies]
+gtk = { package = "gtk4", version = "0.11", features = ["v4_22"] }
+adw = { package = "libadwaita", version = "0.9", features = ["v1_9"] }
+glycin = { version = "3.1", features = ["gdk4"] }
+libvips = "1.7"
+async-channel = "2"
+png = "0.18"
+md5 = "0.7"
+toml = "1"
+kamadak-exif = "0.6"
+serde = { version = "1", features = ["derive"] }
+tempfile = "3"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+debug = false

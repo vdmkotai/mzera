@@ -12,6 +12,8 @@ glycin loaders 2.1.5, GStreamer 1.28.6, libvips 8.18.5).
 | `gallery-viewer-review.md` | GTK internals vs the plan: GridView, textures, models, scan, viewer, video, startup | Two plan-breaking findings: GtkGridView has no sections; glycin does not downscale. Custom gallery widget recommended |
 | `input.md` | complete keyboard + mouse map, Hyprland conflicts, GTK4 implementation notes | Full map delivered; Super combos, Alt+Tab, media keys and Ctrl+Space are unavailable to the app |
 | `skeleton/` | the Cargo.toml and main.rs that compiled and ran in the toolchain check | reference for Phase 0 |
+| `implementation.md` | completed v1 checks and real-data gates | 13 tests pass; scan 84.8 ms; full thumbnail pass 78.3 s with 0 failures |
+| `code-review.md` | independent post-implementation safety, concurrency, performance, and integration review | four high-severity defects and the actionable integration gaps corrected before release |
 
 Test set (corrected path): `~/Downloads/University_of_Problems-1.9.0-Extended-pc`
 37 098 files, 29.3 GB, 248 dirs. Images 34 988 (10.1 GB): WebP 32 779 (all 1920×1080, none animated),

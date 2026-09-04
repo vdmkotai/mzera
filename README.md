@@ -1,28 +1,65 @@
-# mzera
+# Mzera
 
-A small, very fast photo & WebM viewer for Omarchy (Hyprland / Wayland), written in Rust with GTK4 + libadwaita.
-Fully usable from the keyboard and fully usable from the mouse. Follows the Omarchy theme live.
+A small, fast photo and WebM browser for Omarchy (Hyprland/Wayland), written in
+Rust with GTK4 and libadwaita. It is fully usable with either the keyboard or
+the mouse and follows the active Omarchy theme live.
 
-Status: **planned and verified, no code yet.** Read `docs/explainer.html` in a browser, then `docs/PLAN.md`.
-Evidence for every number and every design correction is in `docs/verification/`.
+The usable v1 described by phases 0–6 of [`docs/PLAN.md`](docs/PLAN.md) is
+implemented. Later ideas explicitly listed in the plan—editing, trash/undo,
+sorting by metadata, name search, hover-scrubbing, and per-folder state—remain
+out of scope for v1.
 
-## What it is for
+## Features
 
-- open a folder recursively and just browse, first tiles in well under a second for 35 000 files
-- gallery: flat grid, or grouped by folder with sticky headers and a jump list; thumbnail zoom
-- format filters (only JPEG, hide WebP, …) with presets on 1–9; WebM video inline
-- fullscreen viewer with instant next/prev, scale modes, zoom/pan, captions / metadata / clean, built-in key help
-- launches from `Super+Alt+P`, the app launcher, Nautilus, or `mzera <dir>`
+- streaming recursive scan with natural ordering and immediate first results
+- flat or folder-grouped custom gallery with sticky headers and a jump list
+- freedesktop-compatible 256/512 px thumbnail cache, priority workers, and
+  bounded result back-pressure
+- JPEG, PNG, WebP, GIF, HEIC/AVIF, JXL, SVG/TIFF and WebM/video filtering
+- fullscreen image viewer with preload ring, byte-capped LRU, scale modes,
+  pan/zoom/pinch, rotation, captions, EXIF metadata, slideshow, and key help
+- WebM playback through GTK/GStreamer, including GTK's seek/volume controls
+- persistent layout, thumbnail, scale, caption, and slideshow preferences
+- desktop entry, MIME integration, Nautilus script, and CLI cache warming
 
-## Layout
+## Build and verify
 
+```sh
+make check
+make build
+./target/release/mzera ~/Pictures
+./target/release/mzera --viewer ~/Pictures
+./target/release/mzera --warm ~/Pictures --size 256
 ```
-docs/explainer.html        options, verification results, architecture, measured performance plan, input model, mockups
-docs/PLAN.md               the plan in text form: phases and gates
-docs/verification/         toolchain compile + cold start, thumbnail benchmark, GTK internals review, input model
-docs/verification/skeleton verified Cargo.toml + main.rs (gtk4 0.11 / libadwaita 0.9 / glycin 3.1)
+
+The required Rust components are `rustfmt` and `clippy`. Runtime video support
+on Omarchy is installed with:
+
+```sh
+make deps-video
 ```
 
-## Toolchain
+This installs `gst-plugins-good`, `gst-plugin-va`, and `gst-plugin-dav1d` via
+`omarchy pkg add`. `gst-libav` is an optional compatibility fallback.
 
-Rust via rustup in user space: `export PATH="$HOME/.cargo/bin:$PATH"`.
+## Install and desktop integration
+
+```sh
+make install
+make default       # optional: register mzera as the default viewer
+```
+
+`make install` places the binary and desktop entry under `~/.local`, and adds
+the Nautilus script “Open in Mzera”. To replace the existing Omarchy Photos
+binding in `~/.config/hypr/bindings.lua`, use:
+
+```lua
+hl.unbind("SUPER + ALT + P")
+o.bind("SUPER + ALT + P", "Mzera", { launch = "mzera" })
+```
+
+Then validate the Hyprland configuration with `hyprctl reload` followed by
+`hyprctl configerrors`.
+
+Implementation measurements and runtime verification results are in
+[`docs/verification/implementation.md`](docs/verification/implementation.md).

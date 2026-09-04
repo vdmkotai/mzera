@@ -1,10 +1,10 @@
-# mzera — plan (v2, Rust, verified)
+# Mzera — plan (v2, Rust, verified)
 
 Companion to `explainer.html`. Evidence for every number and every correction is in `verification/`.
 
-Status 2026-09-04: stack decided (**Rust, gtk4-rs + libadwaita**), toolchain installed, plan verified by four
-independent checks (toolchain compile + cold start, thumbnail benchmark on the real test set,
-GTK-internals review of the gallery/viewer design, full keyboard + mouse input model).
+Status 2026-09-04: phases 0–6 are implemented. The toolchain, design, input
+model, release build, real-data performance gates, and WebM hardware decoding
+have been verified; see `verification/implementation.md`.
 
 ## 1. Requirements
 
@@ -68,7 +68,7 @@ works with libvips 8.18), `gstreamer 0.25` only if needed beyond `gtk::MediaFile
 ## 4. Architecture
 
 ```
-mzera <paths…> | --warm <dir> | --gallery | --viewer      (single instance; second launch opens more paths)
+mzera [--gallery|--viewer] [path…] | --warm <dir>          (single instance; one root shown at a time)
   │
   ├─ app.rs        adw::Application, CLI, single-instance, opens window BEFORE the scan starts
   ├─ theme.rs      colors.toml → CSS → one CssProvider; notify/FileMonitor live reload; Adw color scheme
@@ -79,7 +79,7 @@ mzera <paths…> | --warm <dir> | --gallery | --viewer      (single instance; se
   ├─ thumbs.rs     ThumbService: fd.o cache (~/.cache/thumbnails/large, PNG level 1, Thumb::URI/MTime) ·
   │                pool of N threads (8–12 in-app, 16 for --warm) · priority queue keyed by distance from the
   │                viewport centre, LIFO within equal distance, generation counter for cancellation ·
-  │                decoders: libvips thumbnail (webp/jpeg/png/heif/jxl) → glycin Pool fallback → ffmpegthumbnailer
+  │                decoders: libvips thumbnail (images) or ffmpegthumbnailer (video), both off the UI thread
   │                for video · results: async_channel → tick-callback drain, ≤ 32 textures per frame
   ├─ gallery.rs    GalleryView: gtk::Widget + Scrollable · fixed square tiles · flat or sectioned layout with
   │                prefix sums · sticky headers + rubber-band + hover/selection rings drawn in snapshot() ·
@@ -152,11 +152,11 @@ no F-keys, no Super, no Ctrl+Space (layout toggle), no media keys (compositor-ow
 | thumbnails size | `+ −`, `Ctrl+0` | Ctrl+wheel, status-bar px label |
 | captions · help | `t`, `Alt+Enter` · `h`, `?` | toolbar buttons, ? icon, metadata rows clickable |
 | video | `Space`, `Shift+←/→` ±5 s, `Ctrl+Shift` ±30 s, `, .` step, `Shift+↑/↓` volume, `v` mute, `l` loop | click = play/pause, pill: bar scrub, speaker, time |
-| files | `y` copy path, `o` open folder, `e` open with, `Delete` trash, `Ctrl+O`, `Ctrl+R` | context menu (right click), status-bar root/counts |
+| files | `y` copy path, `o` open folder, `e` open with, `Ctrl+O`, `Ctrl+R` | context menu (right click), status-bar root/counts |
 | app | `f`, `q`/`Ctrl+Q`, `Menu`, `Ctrl+Tab` focus regions | ⋮ menu, right click empty space |
 
 Implementation: one static action table → `gio::SimpleAction` + accels + menus + tooltips + help overlay.
-Capture-phase `ShortcutController` for keys that must beat widget defaults; `GestureClick(button 0)` reading
+Capture-phase `EventControllerKey` for keys that must beat widget defaults; `GestureClick(button 0)` reading
 `current_button()` for 1/2/3/8/9 (accept 10/11 too); `EventControllerScroll` with `unit()` to separate wheel
 from touchpad; `GestureZoom` for pinch; `PopoverMenu::from_model` for context menus.
 
