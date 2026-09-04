@@ -45,6 +45,9 @@ lifecycles, concurrency, path handling, cache bounds, and GStreamer behavior.
 - The viewer uses one sandboxed glycin pool limited to four operations.
 - Strict Clippy, debug tests, release tests, release build, desktop validation,
   real-data scan/thumbnail gates, and VP9 hardware playback pass.
+- `cargo-audit 0.22.2` scanned 200 locked crates against 1,239 RustSec
+  advisories and found no known vulnerabilities. It reports one allowed
+  maintenance warning: `paste 1.0.15`, pulled transitively by `glycin`.
 
 ## Residual design risks
 
