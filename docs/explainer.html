@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mzera — plan, options & mockups</title>
+<style>
+/* ---------- Omarchy palettes (real colors.toml values) ---------- */
+:root, [data-theme="osaka-jade"] {
+  --mode: dark;
+  --accent:#509475; --selection:#32473B; --muted:#53685B;
+  --bg:#111c18; --bg-dark:#0c1512; --bg-darker:#090f0d; --bg-light:#23372B;
+  --fg:#C1C497; --fg-dark:#81B8A8; --fg-light:#D6D5BC; --fg-bright:#F7E8B2;
+  --red:#FF5345; --yellow:#459451; --orange:#a2734b; --green:#549e6a; --cyan:#2DD5B7; --blue:#509475; --magenta:#D2689C;
+}
+[data-theme="aether"] { --accent:#89b4fa; --selection:#353543; --muted:#45475a; --bg:#1e1e2e; --bg-dark:#171723; --bg-darker:#0f0f17; --bg-light:#353543; --fg:#cdd6f4; --fg-dark:#9aa1b7; --fg-light:#d5dcf6; --fg-bright:#dae0f7; --red:#f38ba8; --yellow:#f9e2af; --orange:#f59cb5; --green:#a6e3a1; --cyan:#94e2d5; --blue:#89b4fa; --magenta:#cba6f7; }
+[data-theme="tokyo-night"] { --accent:#7aa2f7; --selection:#292e42; --muted:#414868; --bg:#1a1b26; --bg-dark:#13141c; --bg-darker:#0e0e14; --bg-light:#24283b; --fg:#a9b1d6; --fg-dark:#565f89; --fg-light:#b4bee6; --fg-bright:#c0caf5; --red:#f7768e; --yellow:#e0af68; --orange:#eb927b; --green:#9ece6a; --cyan:#449dab; --blue:#7aa2f7; --magenta:#ad8ee6; }
+[data-theme="catppuccin"] { --accent:#89b4fa; --selection:#45475a; --muted:#585b70; --bg:#1e1e2e; --bg-dark:#161622; --bg-darker:#101019; --bg-light:#313244; --fg:#cdd6f4; --fg-dark:#6c7086; --fg-light:#bac2de; --fg-bright:#cdd6f4; --red:#f38ba8; --yellow:#f9e2af; --orange:#f6b6ab; --green:#a6e3a1; --cyan:#94e2d5; --blue:#89b4fa; --magenta:#f5c2e7; }
+[data-theme="gruvbox"] { --accent:#7daea3; --selection:#504945; --muted:#665c54; --bg:#282828; --bg-dark:#1e1e1e; --bg-darker:#161616; --bg-light:#3c3836; --fg:#d4be98; --fg-dark:#7c6f64; --fg-light:#bdae93; --fg-bright:#d4be98; --red:#ea6962; --yellow:#d8a657; --orange:#e1875c; --green:#a9b665; --cyan:#89b482; --blue:#7daea3; --magenta:#d3869b; }
+[data-theme="matte-black"] { --accent:#e68e0d; --selection:#2a2a2a; --muted:#333333; --bg:#121212; --bg-dark:#0d0d0d; --bg-darker:#090909; --bg-light:#1e1e1e; --fg:#bebebe; --fg-dark:#555555; --fg-light:#8a8a8d; --fg-bright:#bebebe; --red:#D35F5F; --yellow:#b91c1c; --orange:#c63d3d; --green:#FFC107; --cyan:#bebebe; --blue:#e68e0d; --magenta:#D35F5F; }
+[data-theme="rose-pine"] { --mode: light; --accent:#56949f; --selection:#dfdad9; --muted:#cecacd; --bg:#faf4ed; --bg-dark:#ede7e1; --bg-darker:#e1dbd5; --bg-light:#f2e9e1; --fg:#575279; --fg-dark:#9893a5; --fg-light:#6e6a86; --fg-bright:#575279; --red:#b4637a; --yellow:#ea9d34; --orange:#cf8057; --green:#286983; --cyan:#d7827e; --blue:#56949f; --magenta:#907aa9; }
+[data-theme="flexoki-light"] { --mode: light; --accent:#205EA6; --selection:#CECDC3; --muted:#B7B5AC; --bg:#FFFCF0; --bg-dark:#f2efe4; --bg-darker:#e5e2d8; --bg-light:#E6E4D9; --fg:#100F0F; --fg-dark:#878580; --fg-light:#403E3C; --fg-bright:#100F0F; --red:#D14D41; --yellow:#D0A215; --orange:#d0772b; --green:#879A39; --cyan:#3AA99F; --blue:#205EA6; --magenta:#CE5D97; }
+
+/* ---------- page ---------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg-darker); color: var(--fg);
+  font: 15px/1.55 "Inter", "Liberation Sans", system-ui, sans-serif;
+}
+code, pre, kbd, .mono { font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", ui-monospace, monospace; }
+a { color: var(--accent); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 32px 28px 120px; }
+h1 { font-size: 40px; letter-spacing: -0.02em; margin: 0 0 6px; color: var(--fg-bright); }
+h2 { font-size: 26px; margin: 64px 0 16px; padding-top: 16px; border-top: 1px solid var(--bg-light); color: var(--fg-bright); letter-spacing: -0.01em; }
+h3 { font-size: 18px; margin: 32px 0 10px; color: var(--fg-light); }
+p.lead { font-size: 18px; color: var(--fg-light); max-width: 820px; }
+.small { font-size: 13px; color: var(--fg-dark); }
+kbd { display: inline-block; padding: 1px 7px; border-radius: 6px; background: var(--bg-light); border: 1px solid var(--muted); font-size: 12px; color: var(--fg-bright); }
+pre { background: var(--bg-dark); border: 1px solid var(--bg-light); border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 12px 0 20px; }
+th, td { text-align: left; padding: 9px 11px; border-bottom: 1px solid var(--bg-light); vertical-align: top; }
+th { color: var(--fg-dark); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+tr.pick td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.tag.ok { background: color-mix(in srgb, var(--green) 22%, transparent); color: var(--green); }
+.tag.no { background: color-mix(in srgb, var(--red) 22%, transparent); color: var(--red); }
+.tag.mid { background: color-mix(in srgb, var(--yellow) 25%, transparent); color: var(--fg-bright); }
+.tag.acc { background: color-mix(in srgb, var(--accent) 25%, transparent); color: var(--accent); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.card { background: var(--bg); border: 1px solid var(--bg-light); border-radius: 14px; padding: 18px 20px; }
+.card h4 { margin: 0 0 8px; font-size: 15px; color: var(--fg-bright); }
+.card.pick { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.card ul { margin: 6px 0 0; padding-left: 18px; }
+.card li { margin: 3px 0; }
+ul.plain { padding-left: 20px; }
+ul.plain li { margin: 5px 0; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
+.toc a { text-decoration: none; padding: 5px 12px; border-radius: 999px; background: var(--bg); border: 1px solid var(--bg-light); color: var(--fg-light); font-size: 13px; }
+.toc a:hover { border-color: var(--accent); }
+
+/* theme switcher */
+.themebar { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg-darker) 85%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--bg-light); padding: 10px 28px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.themebar .lbl { font-size: 12px; color: var(--fg-dark); text-transform: uppercase; letter-spacing: .08em; margin-right: 6px; }
+.themebar button { cursor: pointer; border: 1px solid var(--bg-light); background: var(--bg); color: var(--fg); padding: 5px 11px; border-radius: 999px; font: inherit; font-size: 13px; display: inline-flex; align-items: center; gap: 7px; }
+.themebar button i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,.3); }
+.themebar button.on { border-color: var(--accent); color: var(--fg-bright); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* ---------- mockup framework ---------- */
+.mock { background: var(--bg); border: 1px solid var(--bg-light); border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.35); position: relative; font-size: 12px; color: var(--fg); }
+.mock.full { aspect-ratio: 16 / 9.4; }
+.mock.small { aspect-ratio: 16 / 10; font-size: 10px; }
+.caption { font-size: 13px; color: var(--fg-dark); margin: 10px 2px 30px; }
+.caption b { color: var(--fg-light); }
+/* hyprland-like frame */
+.hframe { padding: 0; border: 2px solid var(--accent); border-radius: 12px; }
+/* top bar */
+.mtop { position: relative; z-index: 3; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: color-mix(in srgb, var(--bg) 70%, var(--bg-dark)); border-bottom: 1px solid var(--bg-light); }
+.mtop.floating { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); border: 1px solid var(--bg-light); border-radius: 999px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); padding: 6px 10px; z-index: 5; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: var(--bg-light); color: var(--fg-light); border: 1px solid transparent; white-space: nowrap; }
+.chip.on { background: color-mix(in srgb, var(--accent) 25%, var(--bg-light)); color: var(--fg-bright); border-color: var(--accent); }
+.chip.off { color: var(--fg-dark); text-decoration: line-through; }
+.chip.ghost { background: transparent; border-color: var(--bg-light); }
+.chip .n { color: var(--fg-dark); font-size: .9em; }
+.sp { flex: 1; }
+.ico { width: 22px; height: 22px; border-radius: 6px; background: var(--bg-light); display: inline-grid; place-items: center; color: var(--fg-light); font-size: 11px; }
+.ico.on { background: color-mix(in srgb, var(--accent) 30%, var(--bg-light)); color: var(--fg-bright); }
+.crumb { color: var(--fg-dark); }
+.crumb b { color: var(--fg-light); font-weight: 500; }
+.search { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--bg-dark); color: var(--fg-dark); min-width: 140px; border: 1px solid var(--bg-light); }
+/* status bar */
+.mstatus { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 14px; padding: 5px 12px; background: color-mix(in srgb, var(--bg-dark) 85%, transparent); border-top: 1px solid var(--bg-light); color: var(--fg-dark); font-size: .95em; }
+.mstatus b { color: var(--fg-light); font-weight: 500; }
+/* gallery */
+.gal { padding: 10px 12px 34px; }
+.gal.under { padding-top: 46px; }
+.mock.small .gal.under { padding-top: 40px; }
+.gal { background: var(--bg-dark); height: 100%; overflow: hidden; }
+.tiles { display: grid; grid-template-columns: repeat(var(--cols, 8), 1fr); gap: var(--gap, 6px); }
+.tile { aspect-ratio: 1; border-radius: 6px; background: var(--bg-light); position: relative; overflow: hidden; }
+.tile.sel { outline: 3px solid var(--accent); outline-offset: -3px; transform: scale(1.04); z-index: 2; box-shadow: 0 6px 16px rgba(0,0,0,.4); }
+.tile .badge { position: absolute; right: 5px; bottom: 5px; padding: 1px 6px; border-radius: 4px; background: rgba(0,0,0,.6); color: #fff; font-size: .85em; font-family: ui-monospace, monospace; }
+.tile .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 26%; height: 26%; border-radius: 50%; background: rgba(0,0,0,.55); border: 1.5px solid rgba(255,255,255,.75); }
+.tile .play::after { content: ""; position: absolute; left: 40%; top: 30%; border-left: 30% solid #fff; border-top: 20% solid transparent; border-bottom: 20% solid transparent; width: 0; height: 0; }
+.tile .fmt { position: absolute; left: 5px; top: 5px; padding: 1px 5px; border-radius: 4px; background: rgba(0,0,0,.55); color: #fff; font-size: .8em; }
+.tile.loading { background: repeating-linear-gradient(45deg, var(--bg-light) 0 8px, color-mix(in srgb, var(--bg-light) 70%, var(--bg-dark)) 8px 16px); }
+.sec { display: flex; align-items: baseline; gap: 10px; margin: 12px 0 6px; padding: 4px 0; position: sticky; top: 0; }
+.sec:first-child { margin-top: 0; }
+.sec b { color: var(--fg-bright); font-weight: 600; font-size: 1.05em; }
+.sec span { color: var(--fg-dark); }
+.sec .line { flex: 1; height: 1px; background: var(--bg-light); }
+/* jump list */
+.jump { position: absolute; right: 0; top: 0; bottom: 0; width: 190px; background: color-mix(in srgb, var(--bg) 92%, transparent); border-left: 1px solid var(--bg-light); padding: 44px 10px 34px; backdrop-filter: blur(8px); }
+.jump .h { color: var(--fg-dark); font-size: .85em; text-transform: uppercase; letter-spacing: .08em; margin: 0 6px 8px; }
+.jump .it { padding: 4px 8px; border-radius: 6px; display: flex; justify-content: space-between; color: var(--fg-light); }
+.jump .it.on { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--fg-bright); }
+.jump .it span { color: var(--fg-dark); }
+.jump .it.sub { padding-left: 20px; }
+/* viewer */
+.viewer { background: #000; height: 100%; position: relative; display: grid; place-items: center; overflow: hidden; }
+.viewer.themed-bg { background: var(--bg-darker); }
+.photo { width: 78%; aspect-ratio: 3/2; border-radius: 3px; box-shadow: 0 30px 60px rgba(0,0,0,.6); background: linear-gradient(135deg, #2b4d5c, #8fb8c4 45%, #e9d8a6 70%, #c96d3e); position: relative; }
+.photo.wide { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
+.overlay { position: absolute; font-family: "JetBrainsMono Nerd Font", ui-monospace, monospace; font-size: .95em; color: var(--fg-bright); background: rgba(0,0,0,.55); padding: 6px 9px; border-radius: 6px; line-height: 1.45; }
+.overlay.tl { left: 12px; top: 12px; } .overlay.tr { right: 12px; top: 12px; } .overlay.bl { left: 12px; bottom: 12px; } .overlay.br { right: 12px; bottom: 12px; }
+.overlay .k { color: var(--fg-dark); display: inline-block; min-width: 76px; }
+.meta-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 34%; background: color-mix(in srgb, var(--bg) 94%, transparent); border-left: 1px solid var(--bg-light); padding: 16px; backdrop-filter: blur(10px); font-size: .95em; }
+.meta-panel h5 { margin: 0 0 10px; color: var(--fg-dark); font-size: .85em; text-transform: uppercase; letter-spacing: .08em; }
+.meta-panel .row { display: grid; grid-template-columns: 84px 1fr; gap: 6px; padding: 3px 0; border-bottom: 1px solid var(--bg-light); }
+.meta-panel .row span:first-child { color: var(--fg-dark); }
+.meta-panel .row span:last-child { color: var(--fg-light); overflow-wrap: anywhere; }
+.help { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; }
+.help .box { width: 62%; background: color-mix(in srgb, var(--bg) 96%, transparent); border: 1px solid var(--bg-light); border-radius: 14px; padding: 18px 22px; box-shadow: 0 30px 60px rgba(0,0,0,.5); display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px; }
+.help .box h5 { grid-column: 1 / -1; margin: 0 0 4px; color: var(--fg-bright); font-size: 1.15em; }
+.help .g { color: var(--accent); font-size: .85em; text-transform: uppercase; letter-spacing: .08em; margin-top: 8px; }
+.help .r { display: flex; justify-content: space-between; gap: 12px; color: var(--fg-light); }
+.help .r kbd { font-size: .95em; }
+.popover { position: absolute; top: 44px; left: 50%; transform: translateX(-30%); background: var(--bg); border: 1px solid var(--bg-light); border-radius: 12px; padding: 12px; width: 260px; box-shadow: 0 20px 40px rgba(0,0,0,.5); z-index: 6; }
+.popover .row { display: flex; align-items: center; gap: 8px; padding: 5px 4px; color: var(--fg-light); }
+.popover .row span.n { margin-left: auto; color: var(--fg-dark); font-family: ui-monospace, monospace; }
+.cb { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--muted); display: inline-block; }
+.cb.on { background: var(--accent); border-color: var(--accent); position: relative; }
+.cb.on::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid var(--bg); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.popover .sep { height: 1px; background: var(--bg-light); margin: 6px 0; }
+.popover .btns { display: flex; gap: 6px; margin-top: 6px; }
+.popover .btn { flex: 1; text-align: center; padding: 4px; border-radius: 6px; background: var(--bg-light); color: var(--fg-light); }
+.popover .btn.acc { background: var(--accent); color: var(--bg); font-weight: 600; }
+.vctl { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); width: 60%; display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 999px; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); color: #fff; }
+.vctl .bar { flex: 1; height: 4px; border-radius: 4px; background: rgba(255,255,255,.25); position: relative; }
+.vctl .bar::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 38%; background: var(--accent); border-radius: 4px; }
+/* sidebar variant */
+.side { position: absolute; left: 0; top: 0; bottom: 0; width: 200px; background: var(--bg); border-right: 1px solid var(--bg-light); padding: 44px 8px 34px; }
+.side .it { padding: 4px 8px; border-radius: 6px; color: var(--fg-light); display: flex; gap: 6px; }
+.side .it.on { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--fg-bright); }
+.side .it.sub { padding-left: 22px; } .side .it.sub2 { padding-left: 36px; }
+.side .it i { color: var(--fg-dark); font-style: normal; }
+.folder-tile { aspect-ratio: 1; border-radius: 8px; background: var(--bg-light); position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; }
+.folder-tile > div { border-radius: 3px; }
+.folder-tile .name { position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 6px; background: linear-gradient(transparent, rgba(0,0,0,.75)); color: #fff; font-size: .95em; grid-column: 1/-1; }
+/* arch diagram */
+.arch { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+.arch .b { background: var(--bg); border: 1px solid var(--bg-light); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+.arch .b b { display: block; color: var(--fg-bright); margin-bottom: 4px; }
+.arch .b.native { border-color: color-mix(in srgb, var(--green) 60%, var(--bg-light)); }
+.arch .b.py { border-color: color-mix(in srgb, var(--accent) 60%, var(--bg-light)); }
+.arch .b .who { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--fg-dark); }
+.arch .wide { grid-column: 1 / -1; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--fg-dark); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; }
+.budget td:nth-child(2) { font-family: ui-monospace, monospace; color: var(--fg-bright); }
+.phase { display: grid; grid-template-columns: 150px 1fr 260px; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--bg-light); }
+.phase .n { color: var(--accent); font-weight: 600; }
+.phase .gate { color: var(--fg-dark); font-size: 13px; }
+.phase .gate b { color: var(--fg-light); font-weight: 500; }
+.q { background: var(--bg); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 10px 0; }
+.q b { color: var(--fg-bright); }
+.q .rec { color: var(--fg-dark); font-size: 13px; margin-top: 4px; }
+@media (max-width: 900px) { .grid2, .grid3, .arch { grid-template-columns: 1fr; } .phase { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="themebar">
+  <span class="lbl">Preview in Omarchy theme</span>
+  <button data-t="osaka-jade" class="on"><i style="background:#509475"></i>Osaka Jade <span class="small">(current)</span></button>
+  <button data-t="aether"><i style="background:#89b4fa"></i>Aether</button>
+  <button data-t="tokyo-night"><i style="background:#7aa2f7"></i>Tokyo Night</button>
+  <button data-t="catppuccin"><i style="background:#89b4fa"></i>Catppuccin</button>
+  <button data-t="gruvbox"><i style="background:#7daea3"></i>Gruvbox</button>
+  <button data-t="matte-black"><i style="background:#e68e0d"></i>Matte Black</button>
+  <button data-t="rose-pine"><i style="background:#56949f"></i>Rosé Pine <span class="small">(light)</span></button>
+  <button data-t="flexoki-light"><i style="background:#205EA6"></i>Flexoki Light</button>
+  <span class="small" style="margin-left:auto">every color below comes from that theme's <code>colors.toml</code> — this is what "syncs with Omarchy" means</span>
+</div>
+
+<div class="wrap">
+
+<h1>mzera</h1>
+<p class="lead">A small, fast, keyboard-first photo &amp; WebM viewer for Omarchy. This page lays out the requirements, the stack options with an honest comparison, the architecture that makes it fast, how it follows your Omarchy theme, and mockups of the UI. Decisions I need from you are collected at the very end.</p>
+<div class="toc">
+  <a href="#req">1 Requirements</a><a href="#ceiling">2 Where swayimg stops</a><a href="#options">3 Stack options</a><a href="#rec">4 Recommendation</a><a href="#arch">5 Architecture</a><a href="#perf">6 Performance plan</a><a href="#theme">7 Theme sync</a><a href="#mock">8 Mockups</a><a href="#keys">9 Keys</a><a href="#road">10 Roadmap</a><a href="#ask">11 Decisions for you</a>
+</div>
+
+<!-- =============================================================== -->
+<h2 id="req">1. Requirements</h2>
+<div class="grid3">
+  <div class="card">
+    <h4>Must have — v1</h4>
+    <ul>
+      <li>Open a folder <b>recursively</b>; first tiles visible immediately even for ~35 000 files</li>
+      <li>Gallery: <b>flat grid</b> and <b>grouped by folder</b>, thumbnail zoom</li>
+      <li><b>Format filters</b>: only JPEG, hide WebP, … include/exclude per format</li>
+      <li>Fullscreen <b>viewer</b>: ← → navigate, scale modes, pan/zoom</li>
+      <li>Captions: brief / <b>metadata</b> (path, EXIF) / none. <b>Help overlay</b> with all keys</li>
+      <li><b>WebM video</b> in the gallery and in the viewer</li>
+      <li><b>Follows the Omarchy theme</b> automatically</li>
+      <li>Launch: <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd>, launcher, Nautilus, CLI</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Nice to have — later</h4>
+    <ul>
+      <li>Slideshow, rotate, move to trash, open in editor, copy path</li>
+      <li>Sort by name / date / size, name search, date &amp; size filters</li>
+      <li>Remember per-folder position, mode and filter</li>
+      <li>Hover-scrub on video thumbnails</li>
+      <li>Rust port of the hot modules if profiling ever asks for it</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Constraints</h4>
+    <ul>
+      <li>Wayland · Hyprland · Omarchy; no X11 assumptions</li>
+      <li><b>Performance is the top priority</b> — test set: 34 981 files, 10 GB, mostly WebP</li>
+      <li>No QtWidgets look; native GTK4/libadwaita is the target</li>
+      <li>English-only UI; <b>no F-keys</b></li>
+      <li>Deliberately small codebase, "a bit nicer UI with room to grow", not a photo manager</li>
+      <li>Not planned: editing, tags, ratings, library DB, cloud</li>
+    </ul>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<h2 id="ceiling">2. Where the swayimg + Lua approach stops</h2>
+<p>The current setup (<code>~/.config/swayimg/init.lua</code>, 498 lines, <code>photos</code> wrapper, <code>photos-warm</code>) delivered recursion, filters, three caption modes, a help overlay, scale modes and thumbnail zoom. It is a good fallback and stays. But every remaining requirement hits a hard wall in swayimg itself:</p>
+<table>
+  <tr><th>Requirement</th><th>swayimg reality</th><th>Verdict</th></tr>
+  <tr><td>Gallery grouped by folder</td><td>The image list is one flat array; the gallery renderer draws a plain grid with no headers or sections. Lua can reorder items but cannot draw anything.</td><td><span class="tag no">impossible</span></td></tr>
+  <tr><td>Fast gallery on 35 k files</td><td>Thumbnails are built by a single background worker; measured: <code>preload</code> stopped after 91 thumbnails and went idle. The 2.5 GB PNG cache we pre-built helps the second visit only.</td><td><span class="tag no">ceiling</span></td></tr>
+  <tr><td>WebM video</td><td>No video decoding at all; would need ffmpeg wired into a C codebase.</td><td><span class="tag no">no</span></td></tr>
+  <tr><td>"Beautiful UI", clickable filters, chips, popovers</td><td>Only a text overlay with a background box. No widgets, no mouse targets.</td><td><span class="tag no">no</span></td></tr>
+  <tr><td>Theme sync</td><td>Colors can be set from Lua, and a <code>.tpl</code> could regenerate the Lua file. Works, but only for colors.</td><td><span class="tag mid">partial</span></td></tr>
+</table>
+
+<!-- =============================================================== -->
+<h2 id="options">3. Stack options</h2>
+<p>Everything below was checked against what is actually installed on your machine (GTK 4.22, libadwaita 1.9, python-gobject 3.56, glycin 2.1 with heif/jxl/svg loaders, GStreamer 1.28, libvips 8.18, ffmpeg 9, Node 26, Quickshell 0.3; <em>no</em> Rust, Go, meson, WebKitGTK or gst-plugins-good).</p>
+
+<table>
+  <tr><th></th><th>A · swayimg + Lua<br><span class="small">today</span></th><th>B · fork swayimg<br><span class="small">C, Wayland</span></th><th>C · GTK4 + libadwaita<br><span class="small">Python ★</span></th><th>D · GTK4 + libadwaita<br><span class="small">Rust</span></th><th>E · Qt Quick / QML<br><span class="small">Quickshell-style</span></th><th>F · Web<br><span class="small">Tauri / Electron</span></th><th>G · GTK front + swayimg engine</th></tr>
+  <tr><td>Grouped-by-folder gallery</td><td><span class="tag no">no</span></td><td>write from scratch</td><td><span class="tag ok">native</span> GtkGridView sections (GTK ≥ 4.12)</td><td><span class="tag ok">native</span></td><td>write (ListView + sections)</td><td>write (virtualized DOM)</td><td>front only, not in the viewer</td></tr>
+  <tr><td>Clickable, themeable UI</td><td><span class="tag no">no</span></td><td>hand-drawn in C</td><td><span class="tag ok">yes</span></td><td><span class="tag ok">yes</span></td><td><span class="tag ok">yes</span>, custom-skinned</td><td><span class="tag ok">yes</span></td><td>half</td></tr>
+  <tr><td>WebM video</td><td><span class="tag no">no</span></td><td>ffmpeg integration, big</td><td><span class="tag ok">Gtk.MediaFile</span> (GStreamer)</td><td>same</td><td>QtMultimedia, extra pkgs</td><td><code>&lt;video&gt;</code></td><td><span class="tag no">no</span></td></tr>
+  <tr><td>Thumbnail throughput</td><td>1 worker, stalls</td><td>good</td><td><span class="tag ok">native</span> libvips / glycin workers</td><td><span class="tag ok">best</span></td><td>Qt image threads</td><td>native backend needed</td><td>libvips workers</td></tr>
+  <tr><td>Omarchy theme sync</td><td>colors only</td><td>colors only</td><td><span class="tag ok">CSS, live</span></td><td>same</td><td>QML palette, live</td><td>CSS, live</td><td>front only</td></tr>
+  <tr><td>Looks like the rest of the desktop</td><td>n/a</td><td>custom</td><td><span class="tag ok">Adwaita</span>, same as Nautilus / GTK apps</td><td>same</td><td>custom; consistent with the Omarchy bar, not with GTK apps</td><td>custom</td><td>mixed</td></tr>
+  <tr><td>Toolchain installed</td><td>yes</td><td>gcc yes; meson no</td><td><span class="tag ok">all of it</span></td><td>rustup needed</td><td>qt6-declarative yes; multimedia no</td><td>node yes; webkit no</td><td>yes</td></tr>
+  <tr><td>Dev cost to v1</td><td>done, at ceiling</td><td>high</td><td><span class="tag ok">~2–3 days</span></td><td>~5–7 days</td><td>~4–5 days</td><td>~4 days</td><td>~1 day, dead end</td></tr>
+  <tr><td>Maintenance</td><td>none</td><td>C codebase</td><td>small Python</td><td>Rust</td><td>QML + C++ glue</td><td>JS + native</td><td>two apps</td></tr>
+</table>
+
+<div class="grid2">
+  <div class="card pick">
+    <h4>C · GTK4 + libadwaita in Python — recommended</h4>
+    <ul>
+      <li>Every hot path is already native: glycin decodes in sandboxed <b>loader processes</b> (no Python GIL involved), libvips is multithreaded C, GTK renders on the GPU, GStreamer plays video.</li>
+      <li>Python only orchestrates: scanning, queues, models, widgets. Scanning 35 k entries with <code>os.scandir</code> is ~0.3 s.</li>
+      <li>GtkGridView recycles tile widgets, so 35 k items cost only as many widgets as fit on screen.</li>
+      <li>Sections by folder, incremental filtering, file dialogs, portals, drag &amp; drop: all built in.</li>
+      <li>Nothing to install. Fastest path to something you can use this week.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Why not the others</h4>
+    <ul>
+      <li><b>A</b> — ceiling reached (section 2).</li>
+      <li><b>B</b> — you would be writing a UI toolkit; video would mean embedding ffmpeg by hand.</li>
+      <li><b>D</b> — the "right" GNOME answer for a long-lived project, but 2–3× the time and a toolchain to install. Kept as the upgrade path per module.</li>
+      <li><b>E</b> — QML is not the ugly QtWidgets look; it is what the Omarchy bar is made of. But you said no Qt, and it would be the only Qt app among GTK ones.</li>
+      <li><b>F</b> — a browser to show a grid of images; heavy, and thumbnails still need a native backend.</li>
+      <li><b>G</b> — the earlier "option 2": the viewer half can never do video or sections.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<h2 id="rec">4. Recommendation in one paragraph</h2>
+<p>Build <b>mzera</b> as a GTK4 + libadwaita application in Python, with the module boundaries drawn so that the scanner and the thumbnail service can be swapped for Rust later without touching the UI. Reuse the freedesktop thumbnail cache so Nautilus and mzera share thumbnails. Keep the swayimg config as a fallback command; <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> starts pointing at <code>mzera</code> from phase 0.</p>
+
+<!-- =============================================================== -->
+<h2 id="arch">5. Architecture</h2>
+<div class="legend"><span><i style="background:color-mix(in srgb, var(--green) 60%, var(--bg-light))"></i>native code, off the UI thread</span><span><i style="background:color-mix(in srgb, var(--accent) 60%, var(--bg-light))"></i>Python orchestration</span></div>
+<div class="arch">
+  <div class="b py wide"><b>Entry points</b><span class="who">cli · desktop entry · Hyprland bind · Nautilus script</span> <code>mzera [--warm] [--gallery|--viewer] [paths…]</code> → single-instance Adw.Application; a second launch just opens more paths.</div>
+  <div class="b py"><b>Scanner</b><span class="who">thread</span> <code>os.scandir</code> recursive, streams batches of ~500 into the model. Skips hidden dirs. Sorts numerically (1, 2, 10) like today.</div>
+  <div class="b py"><b>Model</b><span class="who">Gio.ListStore</span> <code>MediaItem</code>: path, folder, kind (image/video), ext, size, mtime. ~1 KB each → ~35 MB for the test set.</div>
+  <div class="b py"><b>Pipeline</b><span class="who">GTK list models</span> FilterListModel (format chips, incremental) → SortListModel → section model keyed by folder. All lazy, no copies.</div>
+  <div class="b py"><b>Gallery</b><span class="who">Gtk.GridView</span> Recycled tiles, header factory for folder sections, jump list, zoom = change tile size. Flat and grouped are the same view with sections on/off.</div>
+  <div class="b native"><b>ThumbService</b><span class="who">libvips · glycin · ffmpegthumbnailer</span> freedesktop cache (<code>~/.cache/thumbnails/large|x-large</code>), worker pool = cores, LIFO priority by visibility, cancel on scroll-away.</div>
+  <div class="b native"><b>Decoder</b><span class="who">glycin loader processes</span> JPEG, PNG, WebP, GIF, HEIC/AVIF, JXL, SVG, TIFF… decoded sandboxed, off-process, async. EXIF from glycin metadata.</div>
+  <div class="b native"><b>Video</b><span class="who">Gtk.Video · GStreamer</span> WebM (VP8/VP9/AV1) via gst-plugins-good/bad, VA-API hardware decode on the AMD iGPU.</div>
+  <div class="b py"><b>Viewer</b><span class="who">Gtk.Picture</span> Preload ring ±2, Gdk.Texture LRU with a memory cap, scale modes, pan/zoom gestures, captions &amp; help overlays.</div>
+  <div class="b py wide"><b>Theme</b><span class="who">Gio.FileMonitor</span> Reads <code>~/.local/state/omarchy/current/theme/colors.toml</code> → generates CSS → Gtk.CssProvider. Reloads live on theme change. Optional user override via <code>~/.config/omarchy/themed/mzera.css.tpl</code>. <code>mode</code> drives Adw.StyleManager dark/light.</div>
+</div>
+
+<h3>Project layout</h3>
+<pre>mzera/
+├── mzera/                 python package
+│   ├── app.py             Adw.Application, single instance, CLI args
+│   ├── window.py          main window, mode switching (gallery / viewer)
+│   ├── scanner.py         recursive scan → batches
+│   ├── model.py           MediaItem, folder index
+│   ├── thumbs.py          ThumbService, fd.o cache, workers, priorities
+│   ├── gallery.py         GridView, sections, jump list, zoom
+│   ├── viewer.py          Picture/Video, preload ring, scale modes
+│   ├── overlays.py        captions, help, status toast
+│   ├── filters.py         format chips → Gtk.CustomFilter
+│   ├── keys.py            one key table → shortcuts + help text
+│   └── theme.py           Omarchy colors.toml → CSS, live reload
+├── data/                  mzera.desktop, icon, mzera.css.tpl, nautilus script
+├── bin/mzera              launcher
+├── docs/                  this page, PLAN.md
+└── Makefile               install / uninstall into ~/.local</pre>
+
+<!-- =============================================================== -->
+<h2 id="perf">6. Performance plan</h2>
+<p>Test set: <code>~/Downloads/University_of_Problems</code> — 34 981 files, 10 GB, mostly WebP. Budgets are gates: a phase is not done until its numbers hold on this set.</p>
+<table class="budget">
+  <tr><th>Metric</th><th>Budget</th><th>How it is met</th></tr>
+  <tr><td>Open folder → first grid frame</td><td>&lt; 300 ms</td><td>Scanner streams into the model; the grid shows the first batch while the rest is still scanning.</td></tr>
+  <tr><td>Full scan of 35 k entries</td><td>&lt; 1 s</td><td><code>os.scandir</code> with <code>DirEntry.stat</code>, no per-file Python objects until batch insert.</td></tr>
+  <tr><td>Scroll with warm cache</td><td>60 fps</td><td>Thumbnails are PNGs read + turned into Gdk.Texture on workers; the UI thread only swaps a paintable. GridView recycles widgets.</td></tr>
+  <tr><td>Scroll with cold cache</td><td>visible tiles first, no jank</td><td>LIFO priority queue: the tile that scrolled into view last is decoded first; tiles that scrolled away are cancelled.</td></tr>
+  <tr><td>Cold cache build, 35 k WebP → 256 px</td><td>≈ 2–3 min on 16 threads</td><td>libvips shrink-on-load: libwebp scales while decoding, never a full-size bitmap. HEIF/JXL via libvips loaders, everything else via glycin. Background, nice/ionice.</td></tr>
+  <tr><td>Viewer next / prev</td><td>&lt; 50 ms perceived</td><td>Preload ring ±2 via glycin async; the texture is ready before the key is pressed.</td></tr>
+  <tr><td>Filter change on 35 k items</td><td>UI stays responsive</td><td>Gtk.FilterListModel in incremental mode processes in idle slices.</td></tr>
+  <tr><td>Memory</td><td>model ≈ 35 MB · textures ≤ 512 MB</td><td>Tile textures are small; viewer textures live in an LRU with a byte cap.</td></tr>
+</table>
+<div class="grid2">
+  <div class="card"><h4>Why the freedesktop cache</h4><ul><li>Nautilus already writes the same files: thumbnails made by one app are reused by the other.</li><li>Standard: 256 px "large", 512 px "x-large", PNG with <code>Thumb::MTime</code>, invalidated by mtime.</li><li>Survives restarts; no private format to maintain (the swayimg cache was a private layout with inode keys).</li></ul></div>
+  <div class="card"><h4>Fallbacks and guards</h4><ul><li>Any decode error → placeholder tile with a format badge, never a crash or a stall.</li><li>Thumbnail work is cancellable; closing the window drains the pool immediately.</li><li><code>mzera --warm ~/Pictures</code> pre-builds the cache from a terminal or a hook, same code path.</li></ul></div>
+</div>
+
+<!-- =============================================================== -->
+<h2 id="theme">7. Theme sync with Omarchy</h2>
+<p>Omarchy writes the active palette to <code>~/.local/state/omarchy/current/theme/colors.toml</code> on every <code>omarchy theme set</code>. mzera reads it directly, so it works on a fresh install with zero setup, and watches the file to re-skin itself live. Use the theme buttons at the top of this page to see what that looks like across the mockups.</p>
+<div class="grid2">
+<pre># colors.toml (Osaka Jade, your current theme)   →   what mzera does with it
+mode        = "dark"       →  Adw.StyleManager: dark / light
+background  = "#111c18"    →  window, popovers, cards
+dark_background = "#0c1512"→  gallery background
+lighter_background         →  tiles, chips, section lines
+accent      = "#509475"    →  selection ring, active chips, progress
+foreground / muted         →  text / secondary text
+red · green · yellow       →  errors, video badge, warnings</pre>
+<pre># optional override, rendered by Omarchy on theme change:
+# ~/.config/omarchy/themed/mzera.css.tpl
+window.mzera   { background: {{ background }};
+                 color: {{ foreground }}; }
+.mzera-gallery { background: {{ dark_background }}; }
+.tile:selected { outline: 3px solid {{ accent }}; }
+.chip.on       { background: {{ mix accent background 25% }}; }
+
+# → ~/.local/state/omarchy/current/theme/mzera.css
+# loaded if present, else the same CSS is generated
+# in-app from colors.toml</pre>
+</div>
+<p class="small">Font: overlays and metadata use the Omarchy monospace font (<code>omarchy font current</code> → JetBrainsMono Nerd Font); UI text follows GTK settings. Light themes (Rosé Pine, Flexoki) switch the whole app to light mode; the viewer background stays black in "clean" mode because photos look right on black — configurable.</p>
+
+<!-- =============================================================== -->
+<h2 id="mock">8. Mockups</h2>
+<p>Drawn in HTML/CSS with the real Omarchy palettes; the "photos" are gradients. Proportions follow a 16:10 window inside a Hyprland frame with the theme's accent border.</p>
+
+<h3>8.1 App shell — three variants</h3>
+<div class="grid3">
+  <div>
+    <div class="mock small hframe">
+      <div class="mtop floating"><span class="chip on">Flat</span><span class="chip">By folder</span><span class="chip ghost">Filters · 2</span><span class="ico">⌕</span></div>
+      <div class="gal under" style="--cols:7"><div class="tiles" data-tiles="28" data-sel="9"></div></div>
+      <div class="mstatus"><b>Trip 2025</b><span>2 348 files · 14 folders</span><span class="sp"></span><span>JPEG, PNG</span><span>256 px</span></div>
+    </div>
+    <div class="caption"><b>V1 · Immersive (recommended).</b> No header bar; a floating pill holds mode, filters and search. Maximum room for photos, closest to Loupe / a viewer, not a file manager.</div>
+  </div>
+  <div>
+    <div class="mock small hframe">
+      <div class="mtop"><span class="ico">☰</span><span class="crumb">Pictures / <b>Trip 2025</b></span><span class="sp"></span><span class="chip on">Flat</span><span class="chip">By folder</span><span class="chip ghost">Filters</span><span class="search">Search…</span><span class="ico">⋮</span></div>
+      <div class="side"><div class="it on">Trip 2025 <i>2 348</i></div><div class="it sub">Day 1 <i>312</i></div><div class="it sub">Day 2 <i>540</i></div><div class="it sub2">Museum <i>88</i></div><div class="it sub">Day 3 <i>410</i></div></div>
+      <div class="gal" style="--cols:6; margin-left:200px"><div class="tiles" data-tiles="24" data-sel="4"></div></div>
+      <div class="mstatus"><span>2 348 files</span><span class="sp"></span><span>256 px</span></div>
+    </div>
+    <div class="caption"><b>V2 · Classic Adwaita.</b> Header bar + collapsible folder sidebar. Feels like a GNOME app; better for many folders, costs vertical space.</div>
+  </div>
+  <div>
+    <div class="mock small hframe">
+      <div class="mtop floating"><span class="crumb"><b>Trip 2025</b> / Day 2</span><span class="chip ghost">Filters</span></div>
+      <div class="gal under" style="--cols:6"><div class="tiles" data-tiles="6" data-folders="6"></div><div style="height:8px"></div><div class="tiles" data-tiles="18" data-sel="2"></div></div>
+      <div class="mstatus"><span>3 folders · 540 files</span><span class="sp"></span><span>recursive: off</span></div>
+    </div>
+    <div class="caption"><b>V3 · Folder browser.</b> Folder tiles first, then files, breadcrumb navigation. A third gallery mode inside V1 rather than a separate shell — cheap to add later.</div>
+  </div>
+</div>
+
+<h3>8.2 Gallery — flat</h3>
+<div class="mock full hframe">
+  <div class="mtop floating"><span class="chip on">Flat</span><span class="chip">By folder</span><span style="width:1px;height:16px;background:var(--bg-light)"></span><span class="chip ghost">Filters <span class="n">· 2</span></span><span class="chip ghost">Sort: name</span><span class="ico">⌕</span><span class="ico">?</span></div>
+  <div class="gal under" style="--cols:10"><div class="tiles" data-tiles="50" data-sel="13" data-video="7,31" data-loading="46,47,48,49"></div></div>
+  <div class="mstatus"><b>University_of_Problems</b><span>34 981 files · 1 240 folders</span><span class="sp"></span><span>filter: <b>no WebP</b> — 3 106 shown</span><span>thumbs <b>256 px</b></span><span>cache 71 %</span></div>
+</div>
+<div class="caption"><b>Flat grid.</b> <kbd>+</kbd>/<kbd>−</kbd> or <kbd>Ctrl</kbd>+scroll changes tile size. Selected tile gets the accent ring and lifts slightly. Striped tiles at the end are still decoding (cold cache). Video tiles show a play badge and duration. The status line shows the active filter and cache progress.</div>
+
+<h3>8.3 Gallery — grouped by folder</h3>
+<div class="mock full hframe">
+  <div class="mtop floating"><span class="chip">Flat</span><span class="chip on">By folder</span><span style="width:1px;height:16px;background:var(--bg-light)"></span><span class="chip ghost">Filters</span><span class="chip ghost">Sort: name</span><span class="ico">⌕</span><span class="ico">?</span></div>
+  <div class="gal under" style="--cols:8; margin-right:190px">
+    <div class="sec"><b>Day 1</b><span>312 files</span><div class="line"></div><span>Trip 2025 / Day 1</span></div>
+    <div class="tiles" data-tiles="16" data-seed="3"></div>
+    <div class="sec"><b>Day 2 / Museum</b><span>88 files</span><div class="line"></div></div>
+    <div class="tiles" data-tiles="8" data-sel="2" data-seed="11"></div>
+    <div class="sec"><b>Day 2 / Streets</b><span>452 files</span><div class="line"></div></div>
+    <div class="tiles" data-tiles="16" data-seed="7"></div>
+  </div>
+  <div class="jump"><div class="h">Folders</div><div class="it">Day 1 <span>312</span></div><div class="it on">Day 2 <span>540</span></div><div class="it sub on">Museum <span>88</span></div><div class="it sub">Streets <span>452</span></div><div class="it">Day 3 <span>410</span></div><div class="it">Day 4 <span>1 086</span></div></div>
+  <div class="mstatus"><b>Trip 2025</b><span>2 348 files · 14 folders</span><span class="sp"></span><span>section 2 / 14</span></div>
+</div>
+<div class="caption"><b>By folder.</b> Same grid, with sticky section headers and a jump list on the right. <kbd>m</kbd> toggles flat ↔ by folder; <kbd>[</kbd> / <kbd>]</kbd> jump to previous / next folder; clicking a folder in the list scrolls to it. Arrow keys still move through everything in order — navigation does not stop at folder boundaries.</div>
+
+<h3>8.4 Viewer — three caption modes</h3>
+<div class="grid2">
+  <div>
+    <div class="mock small hframe"><div class="viewer"><div class="photo"></div>
+      <div class="overlay tl">IMG_2041.jpg</div><div class="overlay tr">213 / 2 348</div></div></div>
+    <div class="caption"><b>Brief</b> (default): name and position only, small monospace, translucent box so it reads over any photo.</div>
+  </div>
+  <div>
+    <div class="mock small hframe"><div class="viewer"><div class="photo wide" style="background:linear-gradient(160deg,#1c2431,#3e5a72 40%,#a7c4d4 70%,#f0dcb0)"></div></div></div>
+    <div class="caption"><b>Clean</b> (<kbd>t</kbd> twice): nothing but the image. Shown in "fill" scale mode.</div>
+  </div>
+</div>
+<div class="mock full hframe"><div class="viewer"><div class="photo" style="width:52%; margin-right:34%"></div>
+  <div class="overlay tl">IMG_2041.jpg</div>
+  <div class="overlay bl">fit · 31 %</div>
+  <div class="meta-panel"><h5>Metadata</h5>
+    <div class="row"><span>File</span><span>IMG_2041.jpg</span></div>
+    <div class="row"><span>Folder</span><span>Trip 2025 / Day 2 / Museum</span></div>
+    <div class="row"><span>Path</span><span>~/Pictures/Trip 2025/Day 2/Museum/IMG_2041.jpg</span></div>
+    <div class="row"><span>Format</span><span>JPEG · 6000 × 4000 · 4.2 MB</span></div>
+    <div class="row"><span>Modified</span><span>2025-06-14 18:22</span></div>
+    <div class="row"><span>Taken</span><span>2025-06-14 17:03</span></div>
+    <div class="row"><span>Camera</span><span>Sony ILCE-7M4</span></div>
+    <div class="row"><span>Lens</span><span>FE 35 mm F1.8</span></div>
+    <div class="row"><span>Exposure</span><span>f/2.8 · 1/250 s · ISO 400 · 35 mm</span></div>
+    <div class="row"><span>Position</span><span>213 / 2 348</span></div>
+    <div style="margin-top:14px" class="small">copy path <kbd>y</kbd> · open folder <kbd>o</kbd></div>
+  </div>
+</div></div>
+<div class="caption"><b>Metadata</b> (<kbd>t</kbd>): a side panel with path, format, EXIF and the exposure computed into a human string; the image re-fits into the remaining width. If you prefer the swayimg-style corner overlay, that is a fourth caption mode, not a redesign.</div>
+
+<h3>8.5 Help overlay, filter popover, video</h3>
+<div class="grid3">
+  <div>
+    <div class="mock small hframe"><div class="viewer"><div class="photo"></div>
+      <div class="help"><div class="box" style="width:88%">
+        <h5>Keys</h5>
+        <div><div class="g">Navigate</div><div class="r"><span>Prev / next</span><kbd>← →</kbd></div><div class="r"><span>Pan</span><kbd>Shift+arrows</kbd></div><div class="r"><span>Gallery ↔ viewer</span><kbd>g</kbd></div><div class="r"><span>Prev / next folder</span><kbd>[ ]</kbd></div></div>
+        <div><div class="g">View</div><div class="r"><span>Scale mode</span><kbd>w</kbd></div><div class="r"><span>Captions</span><kbd>t</kbd></div><div class="r"><span>Flat / by folder</span><kbd>m</kbd></div><div class="r"><span>Thumb size</span><kbd>+ −</kbd></div></div>
+        <div><div class="g">Filters</div><div class="r"><span>Cycle</span><kbd>Tab</kbd></div><div class="r"><span>Pick / reset</span><kbd>1–9 · 0</kbd></div></div>
+        <div><div class="g">App</div><div class="r"><span>Fullscreen</span><kbd>f</kbd></div><div class="r"><span>Quit</span><kbd>q</kbd></div></div>
+      </div></div></div></div>
+    <div class="caption"><b>Help</b> (<kbd>h</kbd> / <kbd>?</kbd>): generated from the same key table the shortcuts come from, so it can never drift out of date. No F-keys anywhere.</div>
+  </div>
+  <div>
+    <div class="mock small hframe">
+      <div class="mtop floating"><span class="chip on">Flat</span><span class="chip">By folder</span><span class="chip on">Filters · 2</span></div>
+      <div class="popover">
+        <div class="row"><span class="cb on"></span>JPEG<span class="n">1 902</span></div>
+        <div class="row"><span class="cb on"></span>PNG<span class="n">1 204</span></div>
+        <div class="row"><span class="cb"></span>WebP<span class="n">31 640</span></div>
+        <div class="row"><span class="cb on"></span>GIF<span class="n">12</span></div>
+        <div class="row"><span class="cb on"></span>HEIC / AVIF<span class="n">0</span></div>
+        <div class="row"><span class="cb on"></span>JXL<span class="n">0</span></div>
+        <div class="row"><span class="cb on"></span>Video (WebM)<span class="n">223</span></div>
+        <div class="sep"></div>
+        <div class="row"><span class="cb on"></span>Include subfolders</div>
+        <div class="btns"><span class="btn">Only JPEG</span><span class="btn">All</span><span class="btn acc">Done</span></div>
+      </div>
+      <div class="gal under" style="--cols:7"><div class="tiles" data-tiles="21" data-seed="5"></div></div>
+      <div class="mstatus"><span>3 341 of 34 981 shown</span></div>
+    </div>
+    <div class="caption"><b>Filters.</b> Checkboxes per format with live counts, quick "only" presets, recursion toggle. Same state is reachable by keyboard: <kbd>Tab</kbd> cycles presets, <kbd>1</kbd>–<kbd>9</kbd> pick, <kbd>0</kbd> resets.</div>
+  </div>
+  <div>
+    <div class="mock small hframe"><div class="viewer"><div class="photo" style="background:linear-gradient(120deg,#11202b,#1f4c5e 50%,#6fb1c9)"></div>
+      <div class="overlay tl">clip_0412.webm</div><div class="overlay tr">1 208 / 2 348</div>
+      <div class="vctl"><span>▶</span><div class="bar"></div><span class="mono">0:14 / 0:37</span><span>🔇</span></div></div></div>
+    <div class="caption"><b>Video in the viewer.</b> WebM plays inline through GStreamer with a minimal control pill. <kbd>Space</kbd> play/pause, <kbd>← →</kbd> still navigate files, muted by default, loops.</div>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<h2 id="keys">9. Keys (carried over from the swayimg config)</h2>
+<table>
+  <tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr>
+  <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>previous / next</td><td><kbd>t</kbd></td><td>captions: brief → metadata → clean</td></tr>
+  <tr><td><kbd>Shift</kbd>+arrows</td><td>pan a zoomed image</td><td><kbd>h</kbd> <kbd>?</kbd></td><td>help overlay</td></tr>
+  <tr><td><kbd>g</kbd> <kbd>Enter</kbd></td><td>gallery ↔ viewer</td><td><kbd>m</kbd></td><td>gallery: flat ↔ by folder</td></tr>
+  <tr><td><kbd>Tab</kbd> <kbd>Shift+Tab</kbd> <kbd>1–9</kbd> <kbd>0</kbd></td><td>cycle / pick / reset format filter</td><td><kbd>[</kbd> <kbd>]</kbd></td><td>previous / next folder</td></tr>
+  <tr><td><kbd>w</kbd> <kbd>Shift+w</kbd></td><td>scale mode: fit → fill → width → height → 1:1</td><td><kbd>+</kbd> <kbd>−</kbd></td><td>thumbnail size</td></tr>
+  <tr><td><kbd>f</kbd></td><td>fullscreen</td><td><kbd>Space</kbd></td><td>video play / pause</td></tr>
+  <tr><td><kbd>q</kbd> <kbd>Esc</kbd></td><td>close viewer → gallery → quit</td><td><kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd></td><td>(Hyprland) folder picker → mzera</td></tr>
+</table>
+
+<!-- =============================================================== -->
+<h2 id="road">10. Roadmap</h2>
+<div class="phase"><div class="n">Phase 0 · ½ day<br><span class="small">skeleton</span></div><div>Package layout, <code>mzera</code> CLI, desktop entry, <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> → mzera, folder picker, empty window, theme sync live.</div><div class="gate"><b>Gate:</b> opens from all launch paths, is themed, re-skins when you run <code>omarchy theme set</code>.</div></div>
+<div class="phase"><div class="n">Phase 1 · 1 day<br><span class="small">gallery + thumbnails</span></div><div>Scanner, model, flat GridView, ThumbService with fd.o cache, <code>--warm</code>, thumbnail zoom, status line.</div><div class="gate"><b>Gate:</b> 35 k folder → first frame &lt; 300 ms; smooth scroll with warm cache; cold build finishes in the background.</div></div>
+<div class="phase"><div class="n">Phase 2 · ½–1 day<br><span class="small">viewer</span></div><div>Fullscreen viewer, arrows, scale modes, pan/zoom, preload ring, captions (3 modes), help overlay, key table.</div><div class="gate"><b>Gate:</b> next/prev &lt; 50 ms perceived on the test set.</div></div>
+<div class="phase"><div class="n">Phase 3 · ½ day<br><span class="small">filters + folders</span></div><div>Format chips with counts, incremental filtering, sections by folder, jump list, <kbd>m</kbd> / <kbd>[</kbd> <kbd>]</kbd>.</div><div class="gate"><b>Gate:</b> toggling a filter on 35 k items never freezes the UI.</div></div>
+<div class="phase"><div class="n">Phase 4 · ½ day<br><span class="small">video</span></div><div>Install gst-plugins-good/bad + gst-plugin-va, video tiles via ffmpegthumbnailer, inline playback, video in filters.</div><div class="gate"><b>Gate:</b> WebM plays with hardware decode, arrow keys still navigate.</div></div>
+<div class="phase"><div class="n">Phase 5 · ½ day<br><span class="small">integration</span></div><div>xdg-mime default, Nautilus "Open with" + script, slideshow, trash, rotate, settings file, swayimg kept as <code>photos --engine swayimg</code> fallback.</div><div class="gate"><b>Gate:</b> double-click a photo in Nautilus → mzera with the whole folder.</div></div>
+<p class="small" style="margin-top:14px">Total to a usable v1: about 3–4 working days. Every phase leaves something you can use.</p>
+
+<!-- =============================================================== -->
+<h2 id="ask">11. Decisions for you</h2>
+<div class="q"><b>1. Python now, or Rust from day one?</b><div class="rec">Recommendation: Python. All hot paths are native anyway; Rust doubles the time and needs a toolchain. The module split keeps a later port cheap.</div></div>
+<div class="q"><b>2. App shell: V1 immersive, V2 classic header bar + sidebar, or V1 with V3 folder browser as a third mode?</b><div class="rec">Recommendation: V1 now, V3 as a mode later if you miss a folder tree.</div></div>
+<div class="q"><b>3. Thumbnail cache: shared freedesktop cache or a private one?</b><div class="rec">Recommendation: shared. Nautilus contributes, standard format, nothing to invent.</div></div>
+<div class="q"><b>4. Metadata: side panel (mockup 8.4) or corner overlay like in swayimg today?</b><div class="rec">Recommendation: side panel; overlay is one more mode if you want both.</div></div>
+<div class="q"><b>5. Keep swayimg + <code>photos</code> as a fallback command after mzera is stable?</b><div class="rec">Recommendation: keep until phase 5 is done, then decide.</div></div>
+
+</div>
+
+<script>
+// theme switcher (also honours #theme-name in the URL)
+const setTheme = t => { document.documentElement.dataset.theme = t; document.querySelectorAll('.themebar button').forEach(x => x.classList.toggle('on', x.dataset.t === t)); };
+const h = location.hash.slice(1); if (document.querySelector(`.themebar button[data-t="${h}"]`)) setTheme(h);
+document.querySelectorAll('.themebar button').forEach(b => b.addEventListener('click', () => { setTheme(b.dataset.t); history.replaceState(null, '', '#' + b.dataset.t); }));
+// fake thumbnails: deterministic gradients so the mockups stay stable
+const palettes = [
+  ['#2b4d5c','#8fb8c4','#e9d8a6'], ['#3a2f2a','#a56a3e','#f3d3a0'], ['#1c2b1e','#4f7a4b','#cfe3a8'],
+  ['#2a2440','#7a5fa8','#e5c6ff'], ['#3b1e1e','#b04848','#f7c8a8'], ['#102a33','#2f7f92','#a9e2ee'],
+  ['#2e2e2e','#7a7a7a','#dcdcdc'], ['#3a2a10','#b8842d','#ffe7a3'], ['#0f2b25','#2f8a73','#bff0d8'],
+  ['#2b1a35','#8a3f8f','#f0b3f0'], ['#20303a','#5c86a1','#dbe9f2'], ['#3f2f1d','#a37a45','#f5e2c2'],
+];
+function seeded(s){ return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
+document.querySelectorAll('.tiles').forEach(t => {
+  const n = +t.dataset.tiles, sel = +t.dataset.sel, rnd = seeded(+(t.dataset.seed || 1) * 7919);
+  const vids = (t.dataset.video || '').split(',').filter(Boolean).map(Number);
+  const loading = (t.dataset.loading || '').split(',').filter(Boolean).map(Number);
+  const folders = +t.dataset.folders || 0;
+  for (let i = 0; i < n; i++) {
+    if (i < folders) {
+      const f = document.createElement('div'); f.className = 'folder-tile';
+      for (let k = 0; k < 4; k++) { const p = palettes[Math.floor(rnd()*palettes.length)]; const d = document.createElement('div'); d.style.background = `linear-gradient(${Math.floor(rnd()*360)}deg, ${p[0]}, ${p[1]}, ${p[2]})`; f.appendChild(d); }
+      const nm = document.createElement('div'); nm.className = 'name'; nm.textContent = ['Museum','Streets','Beach','Night','Food','Hotel'][i % 6]; f.appendChild(nm);
+      t.appendChild(f); continue;
+    }
+    const d = document.createElement('div'); d.className = 'tile';
+    if (loading.includes(i)) { d.classList.add('loading'); t.appendChild(d); continue; }
+    const p = palettes[Math.floor(rnd()*palettes.length)];
+    d.style.background = `linear-gradient(${Math.floor(rnd()*360)}deg, ${p[0]}, ${p[1]} ${Math.floor(40+rnd()*30)}%, ${p[2]})`;
+    if (i === sel) d.classList.add('sel');
+    if (vids.includes(i)) { d.innerHTML = '<div class="play"></div><span class="badge">0:37</span>'; }
+    t.appendChild(d);
+  }
+});
+</script>
+</body>
+</html>
