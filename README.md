@@ -32,6 +32,16 @@ make build
 ./target/release/mzera --warm ~/Pictures --size 256
 ```
 
+Build natively on either x86_64 or aarch64 Linux with the same commands above.
+Cargo selects the host architecture; no x86-specific compiler flags are required.
+`cargo` must be on PATH (both the Arch Rust package and rustup are supported).
+On current Arch/Omarchy, install the build and image-decoding dependencies with:
+
+```sh
+omarchy pkg add rust pkgconf gtk4 libadwaita libvips glycin glycin-gtk4
+```
+
+GTK 4.22 or newer and libadwaita 1.9 or newer are required.
 The required Rust components are `rustfmt` and `clippy`. Runtime video support
 on Omarchy is installed with:
 
@@ -39,8 +49,9 @@ on Omarchy is installed with:
 make deps-video
 ```
 
-This installs `gst-plugins-good`, `gst-plugin-va`, and `gst-plugin-dav1d` via
-`omarchy pkg add`. `gst-libav` is an optional compatibility fallback.
+This installs `gst-plugins-good` and `gst-plugin-dav1d` via `omarchy pkg add`.
+VA-API is not required on Apple Silicon: `gst-plugin-va` is optional for GPUs
+with working VA-API drivers. `gst-libav` is an optional compatibility fallback.
 
 ## Install and desktop integration
 
@@ -50,7 +61,7 @@ make default       # optional: register mzera as the default viewer
 ```
 
 `make install` places the binary and desktop entry under `~/.local`, and adds
-the Nautilus script “Open in Mzera”. To replace the existing Omarchy Photos
+the Nautilus script “Open in Mzera”. The desktop icon is shared with mzera-mac. To replace the existing Omarchy Photos
 binding in `~/.config/hypr/bindings.lua`, use:
 
 ```lua
